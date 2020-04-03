@@ -5,7 +5,7 @@ The Agora Video Call is a demo app that will help you get video chat integrated 
   for more info.
 
 
-See the full step-by-step integration [tutorial](C++\ Approach/GUIDE.md). If you'd like to use the Blueprint version of the Agora Unreal SDK, check out this [repo](https://github.com/AgoraIO-Community/Agora-Unreal-SDK-Blueprint).
+See the full step-by-step integration [tutorial](GUIDE.md). If you'd like to use the Blueprint version of the Agora Unreal SDK, check out this [repo](https://github.com/AgoraIO-Community/Agora-Unreal-SDK-Blueprint).
 
 With this sample app, you can:
 
