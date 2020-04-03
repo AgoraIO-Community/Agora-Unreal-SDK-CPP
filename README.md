@@ -58,7 +58,7 @@ Mac
 
 3. Open Unreal Project, go to **Edit->Plugins**. Find category **Project->Other** and make sure plugin is enabled.
 
-![Enable Plugin](ReadMeImages/2020-03-12_13-26-59.png)
+![Enable Plugin](ReadMeImages/PluginEnabledCheck.png)
 
 ## Connect Us
 
