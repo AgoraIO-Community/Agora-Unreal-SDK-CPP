@@ -2,7 +2,7 @@
 
 The Agora Video Call is a demo app that will help you get video chat integrated directly into your Unreal Engine applications using the AgoraPlugin, that wraps Agora Video SDK. This guide will help you get the sample up and running.
 
-See the full step-by-step [integration tutorial](C++\ Approach/GUIDE.md) and [Blueprints Guide](Blueprints\ Approach/GUIDE.md) for more info.
+See the full step-by-step integration ![tutorial](C++\ Approach/GUIDE.md) and ![Blueprints Guide](Blueprints\ Approach/GUIDE.md) for more info.
 
 With this sample app, you can:
 
