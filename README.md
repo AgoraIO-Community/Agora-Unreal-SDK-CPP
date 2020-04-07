@@ -37,7 +37,7 @@ To package the project:
 
 1) File->Package Project->Windows->Windows(64-bit) then select a folder where you want to package and wait for result.
 
-![Alt text](ReadMeImages/HowToPackageProject.png?raw=true "PackageProject")
+![Alt text](ReadMeImages/HowToPackageProjectPC.png?raw=true "PackageProject")
 ![Alt text](ReadMeImages/HowToPackageProjectMac.png?raw=true "PackageProject")
 
 2) Now need to package the plugin. 
