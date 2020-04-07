@@ -16,10 +16,18 @@ Developed with Unreal Engine 4.23
 
 There are two implementations of Agora Video Call demo application:
 1) C++ based.
-2) Blueprints based.
+2) [Blueprints based](https://github.com/AgoraIO-Community/Agora-Unreal-SDK-Blueprint)
 
-Agora plugin is implemented as separate module. Download the project with command `git clone --recursive todo::link_to_the_repo`,
-or [download the plugin here](https://gitlab.nixdev.co/agora.io/agora.io-ue-plugin) and add it's contents to Plugins/AgoraPlugin for each project.
+For step-by-step instruction on building the video-chat functionality from scratch, see the GUIDE.md files in either project.
+
+Agora plugin is implemented as separate module, but is already included in the sample project.  
+If you are starting from scratch, [download the plugin here](https://gitlab.nixdev.co/agora.io/agora.io-ue-plugin) and add it's contents to Plugins/AgoraPlugin inside your new project.
+
+Download the project with command `git clone --recursive todo::link_to_the_repo`.
+
+## Opening the Project
+When you first open the AgoraVideoCall.uproject, you will receive a message saying, "Missing Agora Video Call Modules", click "Yes" and the project should open smoothly. 
+If you are still having issues, right click the .uproject file, and select "Generate XCode Project" (or the PC equivalent), and rebuild the project.
 
 ## Building and running the App
 
@@ -64,9 +72,9 @@ Mac
 
 - You can find full API document at [Document Center](https://docs.agora.io/en/)
 
-## Mac permissions
+## Mac Build Permissions
 
-Add the following permissions in the info.plist file for device access:
+After building your project, add the following permissions in the info.plist file for device access:
 
 1. Build the project for Mac
 2. Right click [your_project_build_name].app and select "Show Package Contents"
