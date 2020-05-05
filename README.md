@@ -31,7 +31,7 @@ If you are still having issues, right click the .uproject file, and select "Gene
 
 ## Building and running the App
 
-Open AgoraVideoCall.uproject with Unreal Editor( version no less than 4.23 ).
+Open AgoraVideoCall.uproject with Unreal Editor version 4.23.
 
 To package the project:
 
