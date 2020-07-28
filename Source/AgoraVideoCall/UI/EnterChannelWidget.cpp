@@ -3,6 +3,7 @@
 #include "EnterChannelWidget.h"
 
 #include "Blueprint/WidgetTree.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "VideoCallPlayerController.h"
 #include "DeviceTestWidget.h"
@@ -54,6 +55,11 @@ If it has already been created you will join the conference in progress"));
 		TestTextBlock->SetText(FText::FromString("Test"));
 		TestButton->AddChild(TestTextBlock);
 		TestButton->OnClicked.AddDynamic(this, &UEnterChannelWidget::OnTest);
+        
+        if( UGameplayStatics::GetPlatformName() == TEXT( "IOS" ) )
+        {
+            TestButton->SetVisibility( ESlateVisibility::Hidden );
+        }
 	}
 
 	if (VideoSettingsButton)
