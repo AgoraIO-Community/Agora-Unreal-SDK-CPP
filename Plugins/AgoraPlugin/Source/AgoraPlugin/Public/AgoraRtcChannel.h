@@ -76,7 +76,7 @@ public:
     - In situations not requiring high security: You can use the temporary token generated at Console. For details, see [Get a temporary token](https://docs.agora.io/en/Agora%20Platform/token?platfor%20*%20m=All%20Platforms#get-a-temporary-token).
     - In situations requiring high security: Set it as the token generated at your server. For details, see [Generate a token](https://docs.agora.io/en/Agora%20Platform/token?platfor%20*%20m=All%20Platforms#get-a-token).
     @param info (Optional) Additional information about the channel. This parameter can be set as null. Other users in the channel do not receive this information.
-    @param uid The user ID. A 32-bit unsigned integer with a value ranging from 1 to (232-1). This parameter must be unique. If `uid` is not assigned (or set as `0`), the SDK assigns a `uid` and reports it in the \ref onJoinChannelSuccess callback. The app must maintain this user ID.
+    @param uid The user ID. A 32-bit unsigned integer with a value ranging from 1 to (232-1). This parameter must be unique. If `uid` is not assigned (or set as `0`), the SDK assigns a `uid` and reports it in the \ref agora::rtc::IChannelEventHandler::onJoinChannelSuccess "onJoinChannelSuccess" callback. The app must maintain this user ID.
     @param options The channel media options: \ref ChannelMediaOptions
 
     @return
@@ -95,8 +95,8 @@ public:
 
     After the user successfully joins the channel, the SDK triggers the following callbacks:
 
-    - The local client: \ref onLocalUserRegistered and \ref onJoinChannelSuccess.
-    - The remote client: \ref onUserJoined and \ref onUserInfoUpdated , if the user joining the channel is in the Communication profile, or is a BROADCASTER in the Live Broadcast profile.
+    - The local client: \ref agora::rtc::IChannelEventHandler::onJoinChannelSuccess "onJoinChannelSuccess"
+    - The remote client: \ref agora::rtc::IChannelEventHandler::onUserJoined "onUserJoined"
 
     @note To ensure smooth communication, use the same parameter type to identify the user. For example, if a user joins the channel with a user ID, then ensure all the other users use the user ID too. The same applies to the user account.
     If a user joins the channel with the Agora Web SDK, ensure that the uid of the user is set to the same parameter type.
@@ -129,15 +129,15 @@ public:
 
     This method returns 0 if the user leaves the channel and releases all resources related to the call.
 
-    This method call is asynchronous, and the user has not left the channel when the method call returns. Once the user leaves the channel, the SDK triggers the \ref onLeaveChannel callback.
+    This method call is asynchronous, and the user has not left the channel when the method call returns. Once the user leaves the channel, the SDK triggers the \ref agora::rtc::IChannelEventHandler::onLeaveChannel "onLeaveChannel" callback.
 
-    A successful \ref leaveChannel method call triggers the following callbacks:
-    - The local client: \ref onLeaveChannel 
-    - The remote client: \ref onUserOffline , if the user leaving the channel is in the Communication channel, or is a BROADCASTER in the Live Broadcast profile.
+    A successful `leaveChannel` method call triggers the following callbacks:
+    - The local client: \ref agora::rtc::IChannelEventHandler::onLeaveChannel "onLeaveChannel"
+    - The remote client: \ref agora::rtc::IChannelEventHandler::onUserOffline "onUserOffline", if the user leaving the channel is in the Communication channel, or is a BROADCASTER in the Live Broadcast profile.
 
     @note
-    - If you call the \ref release method immediately after the *leaveChannel* method, the *leaveChannel* process interrupts, and the \ref onLeaveChannel callback is not triggered.
-    - If you call the *leaveChannel* method during a CDN live streaming, the SDK triggers the \ref removePublishStreamUrl method.
+    - If you call the \ref release method immediately after the *leaveChannel* method, the `leaveChannel` process interrupts, and the \ref agora::rtc::IChannelEventHandler::onLeaveChannel "onLeaveChannel" callback is not triggered.
+    - If you call the `leaveChannel` method during a CDN live streaming, the SDK triggers the \ref removePublishStreamUrl method.
 
     @return
     - 0: Success.
@@ -197,10 +197,10 @@ public:
 
     The `token` expires after a period of time once the token schema is enabled when:
 
-    - The SDK triggers the \ref onTokenPrivilegeWillExpire callback, or
-    - The \ref onConnectionStateChanged reports CONNECTION_CHANGED_TOKEN_EXPIRED(9).
+    - The SDK triggers the \ref agora::rtc::IChannelEventHandler::onTokenPrivilegeWillExpire "onTokenPrivilegeWillExpire" callback, or
+    - The \ref agora::rtc::IChannelEventHandler::onConnectionStateChanged "onConnectionStateChanged" reports `CONNECTION_CHANGED_TOKEN_EXPIRED(9)`.
 
-    The application should call this method to get the new `token`. Failure to do so will result in the SDK disconnecting from the server.
+    The application should call this method to get a new token. Failure to do so will result in the SDK disconnecting from the server.
 
     @param token Pointer to the new token.
     @return
@@ -289,8 +289,8 @@ public:
     This method can be used to switch the user role in a live broadcast after the user joins a channel.
 
     In the Live Broadcast profile, when a user switches user roles after joining a channel, a successful \ref setClientRole method call triggers the following callbacks:
-    - The local client: \ref onClientRoleChanged 
-    - The remote client: \ref onUserJoined or \ref onUserOffline (BECOME_AUDIENCE)
+    - The local client: \ref agora::rtc::IChannelEventHandler::onClientRoleChanged "onClientRoleChanged"
+    - The remote client: \ref agora::rtc::IChannelEventHandler::onUserJoined "onUserJoined" or \ref agora::rtc::IChannelEventHandler::onUserOffline "onUserOffline" (BECOME_AUDIENCE)
 
     @note
     This method applies only to the Live-broadcast profile.
@@ -497,7 +497,7 @@ public:
     The aspect ratio of the low-video stream is the same as the high-quality video stream. Once the resolution of the high-quality video
     stream is set, the system automatically sets the resolution, frame rate, and bitrate of the low-video stream.
 
-    The method result returns in the \ref onApiCallExecuted callback.
+    The method result returns in the \ref agora::rtc::IRtcEngineEventHandler::onApiCallExecuted "onApiCallExecuted" callback.
 
     @param userId The ID of the remote user sending the video stream.
     @param streamType  Sets the video-stream type. See #REMOTE_VIDEO_STREAM_TYPE.
@@ -519,7 +519,7 @@ public:
     reduce the bandwidth and resources. The aspect ratio of the low-video stream is the same as the high-quality video stream.
     Once the resolution of the high-quality video stream is set, the system automatically sets the resolution, frame rate, and bitrate of the low-video stream.
 
-    The method result returns in the \ref onApiCallExecuted callback.
+    The method result returns in the \ref agora::rtc::IRtcEngineEventHandler::onApiCallExecuted "onApiCallExecuted" callback.
 
     @param streamType Sets the default video-stream type. See #REMOTE_VIDEO_STREAM_TYPE.
 
@@ -558,11 +558,11 @@ public:
     - Each client can send up to 6 kB of data per second.
     - Each user can have up to five data streams simultaneously.
 
-    A successful \ref sendStreamMessage method call triggers
-    the \ref onStreamMessage callback on the remote client, from which the remote user gets the stream message.
+    A successful `sendStreamMessage` method call triggers
+    the \ref agora::rtc::IChannelEventHandler::onStreamMessage "onStreamMessage" callback on the remote client, from which the remote user gets the stream message.
 
-    A failed \ref sendStreamMessage method call triggers
-    the \ref onStreamMessageError callback on the remote client.
+    A failed `sendStreamMessage` method call triggers
+    the \ref agora::rtc::IChannelEventHandler::onStreamMessageError "onStreamMessageError" callback on the remote client.
 
     @note
     - This method applies only to the Communication profile or to the hosts in the Live-broadcast profile. If an audience in the Live-broadcast profile calls this method, the audience may be switched to a host.
@@ -580,9 +580,7 @@ public:
 
    /** Publishes the local stream to a specified CDN live RTMP address.  (CDN live only.)
 
-    The SDK returns the result of this method call in the \ref onStreamPublished callback.
-
-    The \ref addPublishStreamUrl method call triggers the \ref onRtmpStreamingStateChanged callback
+    The \ref addPublishStreamUrl method call triggers the \ref agora::rtc::IChannelEventHandler::onRtmpStreamingStateChanged "onRtmpStreamingStateChanged" callback
     on the local client to report the state of adding a local stream to the CDN.
 
     @note
@@ -607,10 +605,8 @@ public:
 
     This method removes the RTMP URL address (added by the \ref addPublishStreamUrl method) from a CDN live stream.
 
-    The SDK returns the result of this method call in the \ref onStreamUnpublished callback.
-
-    The \ref removePublishStreamUrl method call triggers
-    the \ref onRtmpStreamingStateChanged callback on the local client to report the state of removing an RTMP stream from the CDN.
+    The `removePublishStreamUrl` method call triggers
+    the \ref agora::rtc::IChannelEventHandler::onRtmpStreamingStateChanged "onRtmpStreamingStateChanged" callback on the local client to report the state of removing an RTMP stream from the CDN.
 
     @note
     - This method removes only one RTMP URL address each time it is called.
@@ -626,7 +622,7 @@ public:
 
    /** Sets the video layout and audio settings for CDN live. (CDN live only.)
 
-    The SDK triggers the \ref onTranscodingUpdated callback when you
+    The SDK triggers the \ref agora::rtc::IChannelEventHandler::onTranscodingUpdated "onTranscodingUpdated" callback when you
     call the `setLiveTranscoding` method to update the transcoding setting.
 
     @note
@@ -643,16 +639,15 @@ public:
 
    /** Adds a voice or video stream URL address to a live broadcast.
 
-   The \ref onStreamPublished callback returns the inject status.
    If this method call is successful, the server pulls the voice or video stream and injects it into a live channel.
    This is applicable to scenarios where all audience members in the channel can watch a live show and interact with each other.
 
-    The \ref addInjectStreamUrl method call triggers the following callbacks:
+    The addInjectStreamUrl method call triggers the following callbacks:
    - The local client:
-     - \ref onStreamInjectedStatus , with the state of the injecting the online stream.
-     - \ref onUserJoined (uid: 666), if the method call is successful and the online media stream is injected into the channel.
+     - \ref agora::rtc::IChannelEventHandler::onStreamInjectedStatus "onStreamInjectedStatus", with the state of the injecting the online stream.
+     - \ref agora::rtc::IChannelEventHandler::onUserJoined "onUserJoined" (uid: 666), if the method call is successful and the online media stream is injected into the channel.
    - The remote client:
-     - \ref onUserJoined (uid: 666), if the method call is successful and the online media stream is injected into the channel.
+     - \ref agora::rtc::IChannelEventHandler::onUserJoined "onUserJoined" (uid: 666), if the method call is successful and the online media stream is injected into the channel.
 
     @note
     - Ensure that you enable the RTMP Converter service before using this function. See Prerequisites in the advanced guide *Push Streams to CDN*.
@@ -679,7 +674,7 @@ public:
 
     This method removes the URL address (added by the \ref addInjectStreamUrl method) from the live broadcast.
 
-    @note If this method is called successfully, the SDK triggers the \ref onUserOffline callback and returns a stream uid of 666.
+    @note If this method is called successfully, the SDK triggers the \ref agora::rtc::IChannelEventHandler::onUserOffline "onUserOffline" callback and returns a stream uid of 666.
 
     @param url Pointer to the URL address of the added stream to be removed.
 
@@ -691,11 +686,11 @@ public:
 
    /** Starts to relay media streams across channels.
     *
-     After a successful method call, the SDK triggers the \ref onChannelMediaRelayStateChanged
-     and \ref onChannelMediaRelayEvent callbacks, and these callbacks return the state and events of the media stream relay.
-    - If the \ref onChannelMediaRelayStateChanged callback returns #RELAY_STATE_RUNNING (2) and #RELAY_OK (0), and the \ref onChannelMediaRelayEvent callback 
+     After a successful method call, the SDK triggers the \ref agora::rtc::IChannelEventHandler::onChannelMediaRelayStateChanged "onChannelMediaRelayStateChanged"
+     and \ref agora::rtc::IChannelEventHandler::onChannelMediaRelayEvent "onChannelMediaRelayEvent" callbacks, and these callbacks return the state and events of the media stream relay.
+    - If the \ref agora::rtc::IChannelEventHandler::onChannelMediaRelayStateChanged "onChannelMediaRelayStateChanged" callback returns #RELAY_STATE_RUNNING (2) and #RELAY_OK (0), and the \ref agora::rtc::IChannelEventHandler::onChannelMediaRelayEvent "onChanenlMediaRelayEvent" callback 
     returns #RELAY_EVENT_PACKET_SENT_TO_DEST_CHANNEL (4), the broadcaster starts sending data to the destination channel.
-     - If the \ref onChannelMediaRelayStateChanged callback returns #RELAY_STATE_FAILURE (3), an exception occurs during the media stream relay.
+     - If the \ref agora::rtc::IChannelEventHandler::onChannelMediaRelayStateChanged "onChannelMediaRelayStateChanged" callback returns #RELAY_STATE_FAILURE (3), an exception occurs during the media stream relay.
     
      @note
      - Call this method after the \ref joinChannel method.
@@ -718,7 +713,7 @@ public:
      After a successful \ref startChannelMediaRelay method call, if you want to relay the media stream to more channels, or leave the current relay channel, 
      you can call the \ref updateChannelMediaRelay method.
     
-     After a successful method call, the SDK triggers the \ref onChannelMediaRelayEvent callback with the #RELAY_EVENT_PACKET_UPDATE_DEST_CHANNEL (7) state code.
+     After a successful method call, the SDK triggers the \ref agora::rtc::IChannelEventHandler::onChannelMediaRelayEvent "onChannelMediaRelayEvent" callback with the #RELAY_EVENT_PACKET_UPDATE_DEST_CHANNEL (7) state code.
     
      @note
      Call this method after the \ref startChannelMediaRelay method to update the destination channel.
@@ -735,11 +730,11 @@ public:
     
      Once the relay stops, the broadcaster quits all the destination channels.
     
-     After a successful method call, the SDK triggers the \ref onChannelMediaRelayStateChanged callback. If the callback returns #RELAY_STATE_IDLE (0) and #RELAY_OK (0),
+     After a successful method call, the SDK triggers the \ref agora::rtc::IChannelEventHandler::onChannelMediaRelayStateChanged "onChannelMediaRelayStateChanged" callback. If the callback returns #RELAY_STATE_IDLE (0) and #RELAY_OK (0),
      the broadcaster successfully stops the relay.
     
      @note
-     If the method call fails, the SDK triggers the \ref onChannelMediaRelayStateChanged callback with the #RELAY_ERROR_SERVER_NO_RESPONSE (2) or
+     If the method call fails, the SDK triggers the \ref agora::rtc::IChannelEventHandler::onChannelMediaRelayStateChanged "onChannelMediaRelayStateChanged" callback with the #RELAY_ERROR_SERVER_NO_RESPONSE (2) or
      #RELAY_ERROR_SERVER_CONNECTION_LOST (8) state code. You can leave the channel by calling the \ref leaveChannel method, and the media stream relay automatically stops.
     
      @return
