@@ -64,7 +64,7 @@ public:
 
    /**
    * @brief          Sets function, which loads external symbol
-   * @param          func(symname)
+   * @param          func (symname)
    *                 Function(Symbol name)
    * @return         
    *                 -  0: Success.

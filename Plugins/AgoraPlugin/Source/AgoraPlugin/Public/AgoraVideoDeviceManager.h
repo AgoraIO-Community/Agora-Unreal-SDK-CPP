@@ -120,7 +120,7 @@ public:
    /**
    * @brief          Starts the video-capture device test.
    * @brief          This method tests whether the video-capture device works properly. 
-   *                 Before calling this method, ensure that you have already called the \ref enableVideo method, and the window handle (hwnd) parameter is valid.
+   *                 Before calling this method, ensure that you have already called the \ref agora::rtc::IRtcEngine::enableVideo "enableVideo" method, and the window handle (hwnd) parameter is valid.
    * @param          hwnd
    *                 The window handle used to display the screen.
    * @return

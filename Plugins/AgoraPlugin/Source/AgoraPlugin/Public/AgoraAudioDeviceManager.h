@@ -323,9 +323,9 @@ public:
    /**
    * @brief          Starts the microphone test.
    * @brief          This method tests whether the microphone works properly.           
-   *                 Once the test starts, the SDK uses the \ref onAudioVolumeIndication callback to notify the application with the volume information.
+   *                 Once the test starts, the SDK uses the \ref agora::rtc::IRtcEngineEventHandler::onAudioVolumeIndication callback to notify the application with the volume information.
    * @param          indicationInterval
-   *                 Interval period (ms) of the \ref onAudioVolumeIndication callback cycle.
+   *                 Interval period (ms) of the \ref agora::rtc::IRtcEngineEventHandler::onAudioVolumeIndication callback cycle.
    *
    *                 -  true: Muted.
    *                 -  false: Unmuted.
@@ -397,10 +397,10 @@ public:
    * @brief          Starts the audio device loopback test.
    * @brief          This method tests whether the local audio devices are working properly. 
    *                 After calling this method, the microphone captures the local audio and plays it through the speaker. 
-   *                 The \ref onAudioVolumeIndication callback returns the local audio volume information at the set interval.
+   *                 The \ref agora::rtc::IRtcEngineEventHandler::onAudioVolumeIndication "onAudioVolumeIndication" callback returns the local audio volume information at the set interval.
    * @note           This method tests the local audio devices and does not report the network conditions.
    * @param          indicationInterval
-   *                 The time interval (ms) at which the \ref onAudioVolumeIndication callback returns.
+   *                 The time interval (ms) at which the \ref agora::rtc::IRtcEngineEventHandler::onAudioVolumeIndication "onAudioVolumeIndication" callback returns.
    * @return
    *                 -  0: Success.
    *                 -  < 0: Failure.
