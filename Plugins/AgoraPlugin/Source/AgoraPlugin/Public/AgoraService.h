@@ -29,7 +29,7 @@ namespace ue4
 {
 
 /**
- * Wrapper around agora::base::IAgoraService
+ * Wrapper around agora::base::IAgoraService.
  */
 class AGORAPLUGIN_API AgoraService
 {
@@ -44,10 +44,10 @@ public:
 public:
 
    /**
-   * @brief          Creates the AgoraService object
+   * @brief          Creates the AgoraService object.
    * @return
-   *                 -  Success: Returns a pointer to the AgoraService object
-   *                 -  Failure: Returns nullptr.
+   *                 -  Success: Returns a pointer to the AgoraService object.
+   *                 -  Failure: Returns a null pointer.
    */
 	static AgoraService* createAgoraService();
 
@@ -57,13 +57,13 @@ public:
    /**
    * @brief          Retrieves the warning or error description.
    * @param          err
-   *                 Error code
-   * @return         Error description
+   *                 The error code.
+   * @return         The detailed error description.
    */
 	static const char* getAgoraSdkErrorDescription(int err);
 
    /**
-   * @brief          Sets function, which loads external symbol
+   * @brief          Sets function, which loads external symbol.
    * @param          func (symname)
    *                 Function(Symbol name)
    * @return         
@@ -85,7 +85,6 @@ public:
 
    /**
    * @brief          Retrieves the SDK version number.
-   * @brief          Ensure that you call the createAgoraRtcEngine and initialize methods before calling any other API.
    * @param          build
    *                 Pointer to the build number.
    * @return         The version of the current SDK in the string format. For example, 2.3.1.
