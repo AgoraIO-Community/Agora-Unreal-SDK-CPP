@@ -44,7 +44,7 @@ namespace ue4
 class AParameter;
 
 /**
-* Wrapper around agora::rtc::IRtcEngine
+* Wrapper around agora::rtc::IRtcEngine.
 */
 class AGORAPLUGIN_API AgoraRtcEngine
 {
@@ -58,9 +58,9 @@ public:
 
 public:
    /**
-   * @brief    Creates the \ref IRtcEngine object and returns the pointer.
-   * @return   \arg Success: Pointer to the \ref IRtcEngine object.
-   *           \arg Failure: nullptr.
+   * @brief    Creates the \ref AgoraRtcEngine object and returns the pointer.
+   * @return   \arg Success: Pointer to the AgoraRtcEngine object.
+   *           \arg Failure: A null pointer.
    */
 	static AgoraRtcEngine* createAgoraRtcEngine();
 
@@ -68,39 +68,49 @@ public:
    * @brief                   Initializes the Agora SDK service.
    * @note                    Ensure that you call the \ref createAgoraRtcEngine and \ref initialize methods before calling any other API.
    * @param  rtcEngineContext Pointer to the RTC engine context. See \ref RtcEngineContext.
-   * @return                  \arg Success: 0.
-   *                          \arg Failure: <0.
+   * @return                  \arg 0: Success.
+   *                          \arg < 0: Failure.
    */
 	int initialize(const agora::rtc::RtcEngineContext& rtcEngineContext);
 
 	//TODO:?
 	void setSyncForRelease(bool sync);
 
-   /**
-   * @brief          Sets the channel profile.
-   * @brief          The SDK needs to know the application scenario to set the appropriate channel profile to apply different optimization methods.
-   * @note           \arg  This method applies only to the Live-broadcast profile.
-   *                 \arg  Users in the same channel must use the same channel profile.
-   *                 \arg  Before calling this method to set a new channel profile, \ref release the current engine and create a new engine using \ref createAgoraRtcEngine() and \ref initialize.
-   *                 \arg  Call this method before a user joins a channel because you cannot configure the channel profile when the channel is in use.
-   *                 \arg  In the Communication profile, the Agora SDK supports encoding only in raw data, not in texture.
-   * @param profile  Sets the channel profile. See \ref CHANNEL_PROFILE_TYPE.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
-   */
+   /** Sets the channel profile of AgoraRtcEngine.
+    *
+    * The AgoraRtcEngine object differentiates channel profiles and applies optimization algorithms accordingly.
+    * For example, it prioritizes smoothness and low latency for a video call, and prioritizes video quality for the interactive live video streaming.
+    *
+    * @warning
+    * - To ensure the quality of real-time communication, we recommend that all users in a channel use the same channel profile.
+    * - Call this method before calling \ref joinChannel. You cannot set the channel profile once you have joined the channel.
+    * - The default audio route and video encoding bitrate are different in different channel profiles. For details, see
+    * \ref setDefaultAudioRouteToSpeakerphone and \ref setVideoEncoderConfiguration.
+    *
+    * @param profile The channel profile of the AgoraRtcEngine. See #CHANNEL_PROFILE_TYPE.
+    * @return
+    * - 0(ERR_OK): Success.
+    * - < 0: Failure.
+    *  - -2 (ERR_INVALID_ARGUMENT): The parameter is invalid.
+    *  - -7(ERR_NOT_INITIALIZED): The SDK is not initialized.
+    */
 	int setChannelProfile(agora::rtc::CHANNEL_PROFILE_TYPE profile);
 
    /**
-   * @brief       Sets the role of the user, such as a host or an audience (default), before joining a channel in a live broadcast.
-   * @brief       In the Live Broadcast profile, when a user switches user roles after joining a channel, a successful \ref setClientRole method call triggers the following callbacks:
-   *              \arg  The local client: \ref agora::rtc::IRtcEngineEventHandler::onClientRoleChanged "onClientRoleChanged"
-   *              \arg  The remote client: \ref agora::rtc::IRtcEngineEventHandler::onUserJoined "onUserJoined" or \ref agora::rtc::IRtcEngineEventHandler::onUserOffline "onUserOffline" (BECOME_AUDIENCE)
-   * @brief       This method can be used to switch the user role in a live broadcast after the user joins a channel.
-   * @note        This method applies only to the Live-broadcast profile.
-   * @param  role Sets the role of the user. See #CLIENT_ROLE_TYPE.
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
-   */
+    * @brief       Sets the role of the user, such as a host or an audience (default), before joining a channel in a live broadcast.
+    * @brief       In the Live Broadcast profile, when a user switches user roles after joining a channel, a successful \ref setClientRole method call triggers the following callbacks:
+    *              \arg  The local client: \ref agora::rtc::IRtcEngineEventHandler::onClientRoleChanged "onClientRoleChanged"
+    *              \arg  The remote client: \ref agora::rtc::IRtcEngineEventHandler::onUserJoined "onUserJoined" or \ref agora::rtc::IRtcEngineEventHandler::onUserOffline "onUserOffline" (BECOME_AUDIENCE)
+    * @brief       This method can be used to switch the user role in a live broadcast after the user joins a channel.
+    * @note        This method applies only to the Live-broadcast profile.
+    * @param  role Sets the role of the user. See #CLIENT_ROLE_TYPE.
+    * @return
+    * - 0(ERR_OK): Success.
+    * - < 0: Failure.
+    *   - -1(ERR_FAILED): A general error occurs (no specified reason).
+    *   - -2(ERR_INALID_ARGUMENT): The parameter is invalid.
+    *   - -7(ERR_NOT_INITIALIZED): The SDK is not initialized.
+    */
 	int setClientRole(agora::rtc::CLIENT_ROLE_TYPE role);
 
    /**
@@ -111,6 +121,7 @@ public:
    *                    \arg  The local client: \ref agora::rtc::IRtcEngineEventHandler::onJoinChannelSuccess "onJoinChannelSuccess"
    *                    \arg  The remote client: \ref agora::rtc::IRtcEngineEventHandler::onUserJoined "onUserJoined", if the user joining the channel is in the Communication profile, or is a BROADCASTER in the Live Broadcast profile.
    * @brief             When the connection between the client and Agora's server is interrupted due to poor network conditions, the SDK tries reconnecting to the server. When the local client successfully rejoins the channel, the SDK triggers the \ref agora::rtc::IRtcEngineEventHandler::onRejoinChannelSuccess "onRejoinChannelSuccess" callback on the local client.
+   * @brief             Once a user joins the channel, the user subscribes to the audio and video streams of all the other users in the channel by default, giving rise to usage and billing calculation. If you do not want to subscribe to a specified stream or all remote streams, call the `mute` methods accordingly.
    * @note              A channel does not accept duplicate uids, such as two users with the same uid. If you set uid as 0, the system automatically assigns a uid. If you want to join a channel from different devices, ensure that each device has a different uid.
    * @warning           Ensure that the App ID used for creating the token is the same App ID used by the \ref initialize method for initializing the RTC engine. Otherwise, the CDN live streaming may fail.
    * @param token       The token generated at your server:
@@ -124,11 +135,13 @@ public:
    *                    \arg "!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","
    * @param info        (Optional) Pointer to additional information about the channel. This parameter can be set to NULL or contain channel related information. Other users in the channel will not receive this message.
    * @param uid         (Optional) User ID. A 32-bit unsigned integer with a value ranging from 1 to 2^32-1. The uid must be unique. If a uid is not assigned (or set to 0), the SDK assigns and returns a uid in the \ref agora::rtc::IRtcEngineEventHandler::onJoinChannelSuccess "onJoinChannelSuccess" callback. Your application must record and maintain the returned `uid` since the SDK does not do so.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    *                       - \ref ERR_INVALID_ARGUMENT (-2)
    *                       - \ref ERR_NOT_READY (-3)
    *                       - \ref ERR_REFUSED (-5)
+   *                         - You have created an AgoraRtcChannel object with the same channel name.
+   *                         - You have joined and published a stream in a channel created by the AgoraRtcChannel object.
    */
 	int joinChannel(const char* token, const char* channelId, const char* info, agora::rtc::uid_t uid);
 
@@ -136,6 +149,7 @@ public:
    * @brief             Switches to a different channel.
    * @brief             This method allows the audience of a Live-broadcast channel to switch to a different channel.
    * @brief             After the user successfully switches to another channel, the \ref agora::rtc::IRtcEngineEventHandler::onLeaveChannel "onLeaveChanenl" and \ref agora::rtc::IRtcEngineEventHandler::onJoinChannelSuccess "onJoinChannelSuccess" callbacks are triggered to indicate that the user has left the original channel and joined a new one.
+   * @brief             Once the user switches to another channel, the user subscribes to the audio and video streams of all the other users in the channel by default, giving rise to usage and billing calculation. If you do not want to subscribe to a specified stream or all remote streams, call the `mute` methods accordingly.
    * @note              This method applies to the audience role in a Live-broadcast channel only.
    * @param token       The token generated at your server:
                         \arg  For low-security requirements: You can use the temporary token generated in Console.
@@ -146,8 +160,15 @@ public:
    *                    \arg The 10 numbers: 0 to 9
    *                    \arg The space
    *                    \arg "!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", "{", "}", "|", "~", ","
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return
+   * - 0(ERR_OK): Success.
+   * - < 0: Failure.
+   *   - -1(ERR_FAILED): A general error occurs (no specified reason).
+   *   - -2(ERR_INALID_ARGUMENT): The parameter is invalid.
+   *   - -5(ERR_REFUSED): The request is rejected, probably because the user is not an audience.
+   *   - -7(ERR_NOT_INITIALIZED): The SDK is not initialized.
+   *   - -102(ERR_INVALID_CHANNEL_NAME): The channel name is invalid.
+   *   - -113(ERR_NOT_IN_CHANNEL): The user is not in the channel.
    */
 	int switchChannel(const char* token, const char* channelId);
 
@@ -159,11 +180,13 @@ public:
    * @brief    A successful \ref leaveChannel method call triggers the following callbacks:
    *           \arg  The local client: \ref agora::rtc::IRtcEngineEventHandler::onLeaveChannel "onLeaveChannel"
    *           \arg  The remote client: \ref agora::rtc::IRtcEngineEventHandler::onUserOffline "onUserOffline", if the user leaving the channel is in the Communication channel, or is a BROADCASTER in the Live Broadcast profile.
-   * @brief    
    * @note     \arg  If you call the \ref release method immediately after the `leaveChannel` method, the `leaveChannel` process interrupts, and the `onLeaveChannel` callback is not triggered.
    *           \arg  If you call the `leaveChannel` method during a CDN live streaming, the SDK triggers the \ref removePublishStreamUrl method.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
+   *                 - -1(ERR_FAILED): A general error occurs (no specified reason).
+   *                 - -2(ERR_INALID_ARGUMENT): The parameter is invalid.
+   *                 - -7(ERR_NOT_INITIALIZED): The SDK is not initialized.
    */
 	int leaveChannel();
 
@@ -174,8 +197,11 @@ public:
    *              \arg  The \ref agora::rtc::IRtcEngineEventHandler::onConnectionStateChanged "onConnectionStateChanged" reports `CONNECTION_CHANGED_TOKEN_EXPIRED(9)`.
    * @brief       The application should call this method to get a new token. Failure to do so will result in the SDK disconnecting from the server.
    * @param token Pointer to the new token.
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
+   * @return      \arg  0: Success.
+   *              \arg  < 0: Failure.
+   *                    - -1(ERR_FAILED): A general error occurs (no specified reason).
+   *                    - -2(ERR_INALID_ARGUMENT): The parameter is invalid.
+   *                    - -7(ERR_NOT_INITIALIZED): The SDK is not initialized.
    */
 	int renewToken(const char* token);
 
@@ -196,8 +222,8 @@ public:
    *                    \arg The 10 numbers: 0 to 9
    *                    \arg The space
    *                    \arg "!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", "{", "}", "|", "~", ","
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int registerLocalUserAccount(const char* appId, const char* userAccount);
 
@@ -223,8 +249,8 @@ public:
    *                    \arg The 10 numbers: 0 to 9
    *                    \arg The space
    *                    \arg "!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", "{", "}", "|", "~", ","
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int joinChannelWithUserAccount(const char* token, const char* channelId, const char* userAccount);
 
@@ -236,8 +262,8 @@ public:
    * @param userInfo    userInfo A userInfo object that identifies the user:
    *                    \arg  Input: A userInfo object.
    *                    \arg  Output: A userInfo object that contains the user account and user ID of the user.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int getUserInfoByUserAccount(const char* userAccount, UserInfo* userInfo);
 
@@ -249,8 +275,8 @@ public:
    * @param userInfo    userInfo A userInfo object that identifies the user:
    *                    \arg  Input: A userInfo object.
    *                    \arg  Output: A userInfo object that contains the user account and user ID of the user.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int getUserInfoByUid(uid_t uid, UserInfo* userInfo);
 
@@ -262,15 +288,15 @@ public:
    *                          \arg  After calling this method, call the \ref stopEchoTest method to end the test. Otherwise, the app cannot run the next echo test, or call the \ref joinChannel method.
    *                          \arg  In the Live-broadcast profile, only a host can call this method.
    * @param intervalInSeconds The time interval (s) between when you speak and when the recording plays back.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int startEchoTest(int intervalInSeconds);
 
    /**
    * @brief    Stops the audio call test.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int stopEchoTest();
 
@@ -288,8 +314,8 @@ public:
    *              <li> \ref muteAllRemoteVideoStreams "muteAllRemoteVideoStreams": Whether to subscribe to and play all remote video streams.
    *           </ul>
    *           </ul>
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int enableVideo();
 
@@ -307,8 +333,8 @@ public:
    *              <li> \ref muteAllRemoteVideoStreams "muteAllRemoteVideoStreams": Whether to subscribe to and play all remote video streams.
    *           </ul>
    *           </ul>
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int disableVideo();
 
@@ -318,8 +344,8 @@ public:
    * @brief          The parameters specified in this method are the maximum values under ideal network conditions. If the video engine cannot render the video using the specified parameters due to poor network conditions, the parameters further down the list are considered until a successful configuration is found.
    * @note           If you do not need to set the video encoder configuration after joining the channel, you can call this method before the \ref enableVideo method to reduce the render time of the first video frame.
    * @param config   Sets the local video encoder configuration. See \ref VideoEncoderConfiguration.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setVideoEncoderConfiguration(const VideoEncoderConfiguration& config);
 
@@ -333,17 +359,20 @@ public:
    *                 </ul>
    * @note           Call this method before enabling the local camera. That said, you can call this method before calling \ref joinChannel, \ref enableVideo, or \ref enableLocalVideo, depending on which method you use to turn on your local camera.
    * @param config   Sets the camera capturer configuration. See \ref CameraCapturerConfiguration.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setCameraCapturerConfiguration(const CameraCapturerConfiguration& config);
 
    /**
    * @brief          Sets the local video view and configures the video display settings on the local machine.
    * @brief          The application calls this method to bind each video window (view) of the local video streams and configures the video display settings. Call this method after initialization to configure the local video display settings before joining a channel. The binding is still valid after the user leaves the channel, which means that the window still displays. To unbind the view, set the view in \ref VideoCanvas to NULL.
-   * @param canvas   Pointer to the local video view and settings. See \ref VideoCanvas.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   *
+   * @note
+   * - You can call this method either before or after joining a channel.
+   * - During a call, you can call this method as many times as necessary to update the display mode of the local video view.   * @param canvas   Pointer to the local video view and settings. See \ref VideoCanvas.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setupLocalVideo(const VideoCanvas& canvas);
 
@@ -355,8 +384,8 @@ public:
    * @brief          If the Video Recording function is enabled, the Video Recording Service joins the channel as a dummy client, causing other clients to also receive the \ref agora::rtc::IRtcEngineEventHandler::onUserJoined "onUserJoined" callback. Do not bind the dummy client to the application view because the dummy client does not send any video streams. If your application does not recognize the dummy client, bind the remote user to the view when the SDK triggers the \ref agora::rtc::IRtcEngineEventHandler::onFirstRemoteVideoDecoded "onFirstRemoteVideoDecoded" callback.
    * @brief          To unbind the remote user from the view, set the view in \ref VideoCanvas to NULL. Once the remote user leaves the channel, the SDK unbinds the remote user.
    * @param canvas   Pointer to the remote video view and settings. See \ref VideoCanvas.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setupRemoteVideo(const VideoCanvas& canvas);
 
@@ -368,26 +397,28 @@ public:
    *           <li> Call the \ref enableVideo method to enable video.
    *           </ul>
    * @note     Once the startPreview method is called to start the local video preview, if you leave the channel by calling the \ref leaveChannel method, the local video preview remains until you call the \ref stopPreview method to disable it.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int startPreview();
 
    /**
    * @brief                Prioritizes a remote user's stream.
    * @brief                Use this method with the \ref setRemoteSubscribeFallbackOption method. If the fallback function is enabled for a subscribed stream, the SDK ensures the high-priority user gets the best possible stream quality.
-   * @note                 The Agora SDK supports setting userPriority as high for one user only.
+   * @note
+   * - The Agora SDK supports setting `userPriority` as high for one user only.
+   * - Ensure that you call this method before joining a channel.
    * @param uid            The ID of the remote user.
    * @param userPriority   Sets the priority of the remote user. See \ref PRIORITY_TYPE.
-   * @return               \arg  Success: 0.
-   *                       \arg  Failure: <0.
+   * @return               \arg  0: Success.
+   *                       \arg  < 0: Failure.
    */
 	int setRemoteUserPriority(agora::rtc::uid_t uid, agora::rtc::PRIORITY_TYPE userPriority);
 
    /**
    * @brief    Stops the local video preview and disables video.
-   * @return               \arg  Success: 0.
-   *                       \arg  Failure: <0.
+   * @return               \arg  0: Success.
+   *                       \arg  < 0: Failure.
    */
 	int stopPreview();
 
@@ -404,8 +435,8 @@ public:
    *              <li> \ref muteAllRemoteVideoStreams "muteAllRemoteVideoStreams": Whether to subscribe to and play all remote video streams.
    *           </ul>
    *           </ul>
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int enableAudio();
 
@@ -413,21 +444,19 @@ public:
    * @brief          Disables/Re-enables the local audio function.
    * @brief          The audio function is enabled by default. This method disables or re-enables the local audio function, that is, to stop or restart local audio capturing.
    * @brief          This method does not affect receiving or playing the remote audio streams, and enableLocalAudio(false) is applicable to scenarios where the user wants to receive remote audio streams without sending any audio stream to other users in the channel.
-   * @brief          The SDK triggers the \ref agora::rtc::IRtcEngineEventHandler::onMicrophoneEnabled "onMicrophoneEnabled" callback once the local audio function is disabled or enabled.
-   * @note           <ul>
-   *                 <li> Call this method after the \ref joinChannel method.
-   *                 <li> This method is different from the \ref muteLocalAudioStream method:
-   *                    <ul>
-   *                    <li> \ref enableLocalAudio "enableLocalAudio": Disables/Re-enables the local audio capturing and processing. If you disable or re-enable local audio recording using the \a enableLocalAudio method, the local user may hear a pause in the remote audio playback.
-   *                    <li> \ref muteLocalAudioStream "muteLocalAudioStream": Sends/Stops sending the local audio streams.
-   *                    </ul>
-   *                 <li> After you disable local audio recording using the \a enableLocalAudio(false) method, the system volume switches to the media volume. Re-enabling local audio recording using the \a enableLocalAudio(true) method switches the system volume back to the in-call volume.
-   *                 </ul>
+   * @brief          Once the local audio function is disabled or re-enabled, the SDK triggers the \ref agora::rtc::IRtcEngineEventHandler::onLocalAudioStateChanged "onLocalAudioStateChanged" callback,
+   * which reports `LOCAL_AUDIO_STREAM_STATE_STOPPED(0)` or `LOCAL_AUDIO_STREAM_STATE_RECORDING(1)`.
+   * @note
+   * - This method is different from the \ref agora::rtc::IRtcEngine::muteLocalAudioStream "muteLocalAudioStream" method:
+   *   - \ref enableLocalAudio: Disables/Re-enables the local audio capturing and processing.
+   *     If you disable or re-enable local audio capturing using the `enableLocalAudio` method, the local user may hear a pause in the remote audio playback.
+   *   - \ref muteLocalAudioStream: Sends/Stops sending the local audio streams.
+   * - You can call this method either before or after joining a channel.
    * @param enabled  Sets whether to disable/re-enable the local audio function:
    *                 \arg  true: (Default) Re-enable the local audio function, that is, to start the local audio capturing device (for example, the microphone).
    *                 \arg  false: Disable the local audio function, that is, to stop local audio capturing.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int enableLocalAudio(bool enabled);
 
@@ -435,8 +464,8 @@ public:
    * @brief    Disables the audio module.
    * @note     \arg  This method affects the internal engine and can be called after the \ref leaveChannel method. You can call this method either before or after joining a channel.
    *           \arg  This method resets the internal engine and takes some time to take effect. We recommend using the \ref enableLocalAudio and \ref muteLocalAudioStream methods to capture, process, and send the local audio streams.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int disableAudio();
 
@@ -447,8 +476,8 @@ public:
    *                 \arg  In scenarios involving music education, we recommend setting profile as \ref AUDIO_PROFILE_MUSIC_HIGH_QUALITY (4) and scenario as \ref AUDIO_SCENARIO_GAME_STREAMING (3).
    * @param profile  Sets the sample rate, bitrate, encoding mode, and the number of channels. See \ref AUDIO_PROFILE_TYPE.
    * @param scenario Sets the audio application scenario. See \ref AUDIO_SCENARIO_TYPE. Under different audio scenarios, the device uses different volume tracks, i.e. either the in-call volume or the media volume. For details, see What is the difference between the in-call volume and the media volume?.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setAudioProfile(agora::rtc::AUDIO_PROFILE_TYPE profile, agora::rtc::AUDIO_SCENARIO_TYPE scenario);
 
@@ -460,8 +489,8 @@ public:
    * @param mute  Sets whether to send/stop sending the local audio stream:
    *              \arg  true: Stops sending the local audio stream.
    *              \arg  false: (Default) Sends the local audio stream.
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
+   * @return      \arg  0: Success.
+   *              \arg  < 0: Failure.
    */
 	int muteLocalAudioStream(bool mute);
 
@@ -470,18 +499,25 @@ public:
    * @param mute  Sets whether to receive/stop receiving all remote users' audio streams.
    *              \arg  true: Stops receiving all remote users' audio streams.
    *              \arg  false: (Default) Receives all remote users' audio streams.
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
+   * @return      \arg  0: Success.
+   *              \arg  < 0: Failure.
    */
 	int muteAllRemoteAudioStreams(bool mute);
 
    /**
    * @brief       Stops/Resumes receiving all remote users' audio streams by default.
+   *
+   *  You can call this method either before or after joining a channel. If you call `setDefaultMuteAllRemoteAudioStreams (true)` after joining a channel, the remote audio streams of all subsequent users are not received.
+   *
+   * @note If you want to resume receiving the audio stream, call \ref muteRemoteAudioStream (false),
+   * and specify the ID of the remote user whose audio stream you want to receive.
+   * To receive the audio streams of multiple remote users, call `muteRemoteAudioStream (false)` as many times.
+   * Calling `setDefaultMuteAllRemoteAudioStreams (false)` resumes receiving the audio streams of subsequent users only.   
    * @param mute  Sets whether to receive/stop receiving all remote users' audio streams by default:
    *              \arg  true: Stops receiving all remote users' audio streams by default.
    *              \arg  false: (Default) Receives all remote users' audio streams by default.
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
+   * @return      \arg  0: Success.
+   *              \arg  < 0: Failure.
    */
 	int setDefaultMuteAllRemoteAudioStreams(bool mute);
    /** Adjusts the playback volume of a specified remote user.
@@ -506,14 +542,15 @@ public:
 
    /**
    * @brief          Stops/Resumes receiving a specified remote user's audio stream.
-   * @note           If you called the \ref muteAllRemoteAudioStreams method and set \a mute as \a true to stop receiving all remote users' audio streams, call the \a muteAllRemoteAudioStreams method and set \a mute as \a false before calling this method. 
-   *                 The \a muteAllRemoteAudioStreams method sets all remote audio streams, while the \a muteRemoteAudioStream method sets a specified remote audio stream.
+   * @note
+   * - You can call this method either before or after joining a channel. If you call it before joining a channel, you need to maintain the `uid` of the remote user on your app level.
+   * - If you called the \ref muteAllRemoteAudioStreams method and set \a mute as \a true to stop receiving all remote users' audio streams, call the \a muteAllRemoteAudioStreams method and set \a mute as \a false before calling this method. The \a muteAllRemoteAudioStreams method sets all remote audio streams, while the \a muteRemoteAudioStream method sets a specified remote audio stream.
    * @param userId   User ID of the specified remote user sending the audio.
    * @param mute     Sets whether to receive/stop receiving a specified remote user's audio stream:
    *                 \arg  true: Stops receiving the specified remote user's audio stream.
    *                 \arg  false: (Default) Receives the specified remote user's audio stream.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int muteRemoteAudioStream(agora::rtc::uid_t userId, bool mute);
 
@@ -525,8 +562,8 @@ public:
    * @param mute  Sets whether to send/stop sending the local video stream:
    *              \arg  true: Stop sending the local video stream.
    *              \arg  false: (Default) Send the local video stream.
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
+   * @return      \arg  0: Success.
+   *              \arg  < 0: Failure.
    */
 	int muteLocalVideoStream(bool mute);
 
@@ -539,28 +576,30 @@ public:
    * @param enabled  Sets whether to disable/re-enable the local video, including the capturer, renderer, and sender:
    *                 \arg  true: (Default) Re-enable the local video.
    *                 \arg  false: Disable the local video. Once the local video is disabled, the remote users can no longer receive the video stream of this user, while this user can still receive the video streams of the other remote users.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int enableLocalVideo(bool enabled);
 
    /**
    * @brief       Stops/Resumes receiving all video stream from a specified remote user.
+   * @note You can call this method either before or after joining a channel.
    * @param mute  Sets whether to receive/stop receiving all remote users' video streams:
    *              \arg  true: Stop receiving all remote users' video streams.
    *              \arg  false: (Default) Receive all remote users' video streams.
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
+   * @return      \arg  0: Success.
+   *              \arg  < 0: Failure.
    */
 	int muteAllRemoteVideoStreams(bool mute);
 
    /**
    * @brief       Stops/Resumes receiving all remote users' video streams by default.
+   * @note If you want to resume receiving the video stream, call \ref muteRemoteVideoStream (false), and specify the ID of the remote user whose video stream you want to receive. To receive the video streams of multiple remote users, call `muteRemoteVideoStream (false)` as many times. Calling `setDefaultMuteAllRemoteVideoStreams (false)` resumes receiving the video streams of subsequent users only.
    * @param mute  Sets whether to receive/stop receiving all remote users' video streams by default:
    *              \arg  true: Stop receiving all remote users' video streams by default.
    *              \arg  false: (Default) Receive all remote users' video streams by default.
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
+   * @return      \arg  0: Success.
+   *              \arg  < 0: Failure.
    */
 	int setDefaultMuteAllRemoteVideoStreams(bool mute);
 
@@ -571,8 +610,8 @@ public:
    * @param mute     Sets whether to stop/resume receiving the video stream from a specified remote user:
    *                 \arg  true: Stop receiving the specified remote user's video stream.
    *                 \arg  false: (Default) Receive the specified remote user's video stream.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int muteRemoteVideoStream(agora::rtc::uid_t userId, bool mute);
 
@@ -584,10 +623,13 @@ public:
    * @brief             The method result returns in the \ref agora::rtc::IRtcEngineEventHandler::onApiCallExecuted "onApiCallExecuted" callback. The SDK receives the high-stream video by default to reduce the bandwidth. 
    *                    If needed, users may use this method to switch to the low-stream video. By default, the aspect ratio of the low-stream video is the same as the high-stream video. 
    *                    Once the resolution of the high-stream video is set, the system automatically sets the resolution, frame rate, and bitrate of the low-stream video.
+   * @note You can call this method either before or after joining a channel. If you call both
+   * \ref setRemoteVideoStreamType and \ref setRemoteDefaultVideoStreamType, the SDK applies the settings in
+   *  the `setRemoteVideoStreamType` method.
    * @param userId      ID of the remote user sending the video stream.
    * @param streamType 	Sets the video-stream type. See \ref REMOTE_VIDEO_STREAM_TYPE.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int setRemoteVideoStreamType(agora::rtc::uid_t userId, agora::rtc::REMOTE_VIDEO_STREAM_TYPE streamType);
 
@@ -596,23 +638,33 @@ public:
    *                    \arg  If the dual-stream mode is enabled by calling the \ref enableDualStreamMode method, the user receives the high-stream video by default. The `setRemoteDefaultVideoStreamType` method allows the application to adjust the corresponding video-stream type according to the size of the video window, reducing the bandwidth and resources.
    *                    \arg  If the dual-stream mode is not enabled, the user receives the high-stream video by default.
    * @brief             The result after calling this method is returned in the \ref agora::rtc::IRtcEngineEventHandler::onApiCallExecuted "onApiCallExecuted" callback. The Agora SDK receives the high-stream video by default to reduce the bandwidth. If needed, users can switch to the low-stream video through this method.
+   *
+   * @note You can call this method either before or after joining a channel. If you call both
+   * \ref setRemoteVideoStreamType and \ref setRemoteDefaultVideoStreamType, the SDK applies the settings in
+   *  the `setRemoteVideoStreamType` method.
+   *
    * @param streamType  Sets the default video-stream type. See \ref REMOTE_VIDEO_STREAM_TYPE.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int setRemoteDefaultVideoStreamType(agora::rtc::REMOTE_VIDEO_STREAM_TYPE streamType);
 
    /**
-   * @brief             Enables the \ref agora::rtc::IRtcEngineEventHandler::onAudioVolumeIndication "onAudioVolumeIndication" callback at a set time interval to report on which users are speaking and the speakers' volume.
-   * @brief             Once this method is enabled, the SDK returns the volume indication in the `onAudioVolumeIndication` callback at the set time interval, whether or not any user is speaking in the channel.
+   * @brief             Enables the reporting of users' volume indication.
+   * @brief             This method enables the SDK to regularly report the volume information of the local user who sends a stream and
+   * remote users (up to three) whose instantaneous volumes are the highest to the app. Once you call this method and
+   * users send streams in the channel, the SDK triggers the
+   * \ref IRtcEngineEventHandler::onAudioVolumeIndication "onAudioVolumeIndication" callback at the time interval set
+   * in this method.
+   * @note You can call this method either before or after joining a channel.
    * @param interval    Sets the time interval between two consecutive volume indications:
    *                    \arg  ≤ 0: Disables the volume indication.
    *                    \arg  > 0: Time interval (ms) between two consecutive volume indications. We recommend setting interval > 200 ms. Do not set interval < 10 ms, or the `onAudioVolumeIndication` callback will not be triggered.
    * @param smooth      Smoothing factor sets the sensitivity of the audio volume indicator. The value ranges between 0 and 10. The greater the value, the more sensitive the indicator. The recommended value is 3.
    * @param report_vad  \arg  true: Enable the voice activity detection of the local user. Once it is enabled, the vad parameter of the `onAudioVolumeIndication` callback reports the voice activity status of the local user.
    *                    \arg  false: (Default) Disable the voice activity detection of the local user. Once it is disabled, the vad parameter of the `onAudioVolumeIndication` callback does not report the voice activity status of the local user, except for the scenario where the engine automatically detects the voice activity of the local user.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int enableAudioVolumeIndication(int interval, int smooth, bool report_vad);
 
@@ -627,22 +679,22 @@ public:
    *                    \arg  This method is usually called after the \ref joinChannel method. The recording automatically stops when you call the \ref leaveChannel method.
    *                    \arg  For better recording effects, set quality as \ref AUDIO_RECORDING_QUALITY_MEDIUM or \ref AUDIO_RECORDING_QUALITY_HIGH when sampleRate is 44.1 kHz or 48 kHz.
    * @param filePath    Pointer to the absolute file path of the recording file. The string of the file name is in UTF-8.
-   * @param sampleRate  Sample rate (kHz) of the recording file. Supported values are as follows:
-   *                    \arg  16
-   *                    \arg  (Default) 32
-   *                    \arg  44.1
-   *                    \arg  48
+   * @param sampleRate  Sample rate (Hz) of the recording file. Supported values are as follows:
+   *                    \arg  16000
+   *                    \arg  (Default) 32000
+   *                    \arg  44100
+   *                    \arg  48000
    * @param quality     Sets the audio recording quality. See \ref AUDIO_RECORDING_QUALITY_TYPE.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int startAudioRecording(const char* filePath, int sampleRate, AUDIO_RECORDING_QUALITY_TYPE quality);
 
    /**
    * @brief    Stops an audio recording on the client.
    * @brief    You can call this method before calling the \ref leaveChannel method else, the recording automatically stops when the \ref leaveChannel method is called.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int stopAudioRecording();
 
@@ -652,8 +704,9 @@ public:
    *                    You can choose whether the other user can hear the local audio playback and specify the number of playback loops. This method also supports online music playback.
    * @brief             A successful \ref startAudioMixing method call triggers the \ref agora::rtc::IRtcEngineEventHandler::onAudioMixingStateChanged "onAudioMixingStateChanged" (PLAY) callback on the local client.
    * @brief             When the audio mixing file playback finishes, the SDK triggers the \ref agora::rtc::IRtcEngineEventHandler::onAudioMixingStateChanged "onAudioMixingStateChanged" (STOPPED) callback on the local client.
-   * @note              \arg  Call this method when you are in a channel.
+   * @note              \arg  Call this method after joining a channel, otherwise issues may occur.
    *                    \arg  If the local audio mixing file does not exist, or if the SDK does not support the file format or cannot access the music file URL, the SDK returns WARN_AUDIO_MIXING_OPEN_ERROR = 701.
+   *                    \arg  If you want to play an online music file, ensure that the time interval between calling this method is more than 100 ms, or the AUDIO_MIXING_ERROR_TOO_FREQUENT_CALL(702) error code occurs.
    * @param filePath    Pointer to the absolute path of the local or online audio file to mix. Supported audio formats: 3GP, ASF, ADTS, AVI, MP3, MPEG-4, SAMI, and WAVE. For more information, see Supported Media Formats in Media Foundation.
    * @param loopback    Sets which user can hear the audio mixing:
    *                    \arg  true: Only the local user can hear the audio mixing.
@@ -664,51 +717,52 @@ public:
    * @param cycle       Sets the number of playback loops:
    *                    \arg  Positive integer: Number of playback loops.
    *                    \arg  -1: Infinite playback loops.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int startAudioMixing(const char* filePath, bool loopback, bool replace, int cycle);
 
    /**
    * @brief    Stops playing and mixing the music file.
    * @brief    Call this method when you are in a channel.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int stopAudioMixing();
 
    /**
    * @brief    Pauses playing and mixing the music file.
    * @brief    Call this method when you are in a channel.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int pauseAudioMixing();
 
    /**
    * @brief    Resumes playing and mixing the music file.
    * @brief    Call this method when you are in a channel.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int resumeAudioMixing();
 
    /**
    * @brief          Adjusts the volume during audio mixing.
-   * @brief          Call this method when you are in a channel.
-   * @note           Calling this method does not affect the volume of audio effect file playback invoked by the \ref playEffect method.
+   * @note
+   * - Calling this method does not affect the volume of audio effect file playback invoked by the \ref playEffect method.
+   * - Ensure that this method is called after \ref startAudioMixing.
    * @param volume   Audio mixing volume. The value ranges between 0 and 100 (default).
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int adjustAudioMixingVolume(int volume);
 
    /**
    * @brief          Adjusts the audio mixing volume for local playback.
-   * @note           Call this method when you are in a channel.
+   * @note           Ensure that this method is called after \ref startAudioMixing.
    * @param volume   Audio mixing volume for local playback. The value ranges between 0 and 100 (default).
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int adjustAudioMixingPlayoutVolume(int volume);
 
@@ -725,15 +779,15 @@ public:
    * @brief          Adjusts the audio mixing volume for publishing (for remote users).
    * @note           Call this method when you are in a channel.
    * @param volume   Audio mixing volume for publishing. The value ranges between 0 and 100 (default).
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int adjustAudioMixingPublishVolume(int volume);
 
    /**
    * @brief    Retrieves the audio mixing volume for publishing.
    * @brief    This method helps troubleshoot audio volume related issues.
-   * @note     Call this method when you are in a channel.
+   * @note     Ensure that this method is called after \ref startAudioMixing.
    * @return   \arg  ≥ 0: The audio mixing volume for publishing, if this method call succeeds. The value range is [0,100].
    *           \arg  < 0: Failure.
    */
@@ -758,14 +812,13 @@ public:
    /**
    * @brief       Sets the playback position of the music file to a different starting position (the default plays from the beginning).
    * @param pos   The playback starting position (ms) of the music file.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setAudioMixingPosition(int pos /*in ms*/);
 
-   /** 
+   /**
     * @brief Sets the pitch of the local music file.
-    * @since v3.0.1
     * @note
     * Call this method after calling `startAudioMixing`.
     *
@@ -774,14 +827,15 @@ public:
     * consecutive values is a chromatic value. The greater the absolute value of this parameter, the
     * higher or lower the pitch of the local music file.
     *
-    * @return         \arg  Success: 0.
-    *                 \arg  Failure: <0.
+    * @return         \arg  0: Success.
+    *                 \arg  < 0: Failure.
     */
    int setAudioMixingPitch( int pitch );
 
    /**
    * @brief    Retrieves the volume of the audio effects.
-   * @brief    The value ranges between 0.0 and 100.0.
+   * @brief    The value ranges between 0 and 100.
+   * @note Ensure that this method is called after \ref playEffect.
    * @return   \arg  ≥ 0: Volume of the audio effects, if this method call succeeds.
    *           \arg  < 0: Failure.
    */
@@ -789,18 +843,20 @@ public:
 
    /**
    * @brief          Sets the volume of the audio effects.
+   * @note Ensure that this method is called after \ref playEffect.
    * @param volume   Sets the volume of the audio effects. The value ranges between 0 and 100 (default).
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setEffectsVolume(int volume);
 
    /**
    * @brief          Sets the volume of a specified audio effect.
+   * @note Ensure that this method is called after \ref playEffect.
    * @param soundId  ID of the audio effect. Each audio effect has a unique ID.
    * @param volume   Sets the volume of the specified audio effect. The value ranges between 0 and 100 (default).
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setVolumeOfEffect(int soundId, int volume);
 
@@ -825,8 +881,8 @@ public:
    * @param publish     Sets whether or not to publish the specified audio effect to the remote stream:
    *                    \arg  true: The locally played audio effect is published to the Agora Cloud and the remote users can hear it.
    *                    \arg  false: The locally played audio effect is not published to the Agora Cloud and the remote users cannot hear it.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int playEffect(
 		int soundId,
@@ -840,15 +896,15 @@ public:
    /**
    * @brief          Stops playing a specified audio effect.
    * @param soundId  ID of the audio effect to stop playing. Each audio effect has a unique ID.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int stopEffect(int soundId);
 
    /**
    * @brief    Stops playing all audio effects.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int stopAllEffects();
 
@@ -859,46 +915,46 @@ public:
    * @brief          Supported audio formats: mp3, aac, m4a, 3gp, and wav.
    * @param soundId  ID of the audio effect. Each audio effect has a unique ID.
    * @param filePath Pointer to the absolute path of the audio effect file.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int preloadEffect(int soundId, const char* filePath);
 
    /**
    * @brief          Releases a specified preloaded audio effect from the memory.
    * @param soundId  ID of the audio effect. Each audio effect has a unique ID.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int unloadEffect(int soundId);
 
    /**
    * @brief          Pauses a specified audio effect.
    * @param soundId  ID of the audio effect. Each audio effect has a unique ID.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int pauseEffect(int soundId);
 
    /**
    * @brief    Pauses all audio effects.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int pauseAllEffects();
 
    /**
    * @brief          Resumes playing a specified audio effect.
    * @param soundId  ID of the audio effect. Each audio effect has a unique ID.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int resumeEffect(int soundId);
 
    /**
    * @brief    Resumes playing all audio effects.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int resumeAllEffects();
 
@@ -908,8 +964,8 @@ public:
    * @param enabled  Sets whether or not to enable stereo panning for remote users:
    *                 \arg  true: enables stereo panning.
    *                 \arg  false: disables stereo panning.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int enableSoundPositionIndication(bool enabled);
 
@@ -924,16 +980,16 @@ public:
    *              \arg  -1.0: the remote sound comes from the left.
    *              \arg  1.0: the remote sound comes from the right.
    * @param gain  Gain of the remote user. The value ranges from 0.0 to 100.0. The default value is 100.0 (the original gain of the remote user). The smaller the value, the less the gain.
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
+   * @return      \arg  0: Success.
+   *              \arg  < 0: Failure.
    */
 	int setRemoteVoicePosition(uid_t uid, double pan, double gain);
 
    /**
    * @brief       Changes the voice pitch of the local speaker.
    * @param pitch Sets the voice pitch. The value ranges between 0.5 and 2.0. The lower the value, the lower the voice pitch. The default value is 1.0 (no change to the local voice pitch).
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
+   * @return      \arg  0: Success.
+   *              \arg  < 0: Failure.
    */
 	int setLocalVoicePitch(double pitch);
 
@@ -941,8 +997,8 @@ public:
    * @brief                Sets the local voice equalization effect.
    * @param bandFrequency  Sets the band frequency. The value ranges between 0 and 9, representing the respective 10-band center frequencies of the voice effects, including 31, 62, 125, 500, 1k, 2k, 4k, 8k, and 16k Hz. See \ref AUDIO_EQUALIZATION_BAND_FREQUENCY.
    * @param bandGain       Sets the gain of each band in dB. The value ranges between -15 and 15.
-   * @return               \arg  Success: 0.
-   *                       \arg  Failure: <0.
+   * @return               \arg  0: Success.
+   *                       \arg  < 0: Failure.
    */
 	int setLocalVoiceEqualization(agora::rtc::AUDIO_EQUALIZATION_BAND_FREQUENCY bandFrequency, int bandGain);
 
@@ -951,38 +1007,74 @@ public:
    * @brief             v2.4.0 adds the \ref setLocalVoiceReverbPreset method, a more user-friendly method for setting the local voice reverberation. You can use this method to set the local reverberation effect, such as pop music, R&B, rock music, and hip-hop.
    * @param reverbKey   Sets the reverberation key. See \ref AUDIO_REVERB_TYPE.
    * @param value       Sets the value of the reverberation key.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int setLocalVoiceReverb(agora::rtc::AUDIO_REVERB_TYPE reverbKey, int value);
 
    /**
    * @brief                Sets the local voice changer option.
-   * @note                 Do not use this method together with the \ref setLocalVoiceReverbPreset method, because the method called later overrides the one called earlier.
-   * @param voiceChanger   Sets the local voice changer option. See \ref VOICE_CHANGER_PRESET.
-   * @return               \arg  Success: 0.
-   *                       \arg  Failure: <0.
+   *
+   * This method can be used to set the local voice effect for users in a `COMMUNICATION` channel or hosts in a `LIVE_BROADCASTING` channel.
+   * Voice changer options include the following voice effects:
+   *
+   * - `VOICE_CHANGER_XXX`: Changes the local voice to an old man, a little boy, or the Hulk. Applies to the voice talk scenario.
+   * - `VOICE_BEAUTY_XXX`: Beautifies the local voice by making it sound more vigorous, resounding, or adding spacial resonance. Applies to the voice talk and singing scenario.
+   * - `GENERAL_VOICE_BEAUTY_XXX`: Adds gender-based beautification effect to the local voice. Applies to the voice talk scenario.
+   *   - For a male voice: Adds magnetism to the voice.
+   *   - For a female voice: Adds freshness or vitality to the voice.
+   * @note
+   * - To achieve better voice effect quality, Agora recommends setting the profile parameter in \ref IRtcEngine::setAudioProfile "setAudioProfile" as #AUDIO_PROFILE_MUSIC_HIGH_QUALITY (4) or #AUDIO_PROFILE_MUSIC_HIGH_QUALITY_STEREO (5)
+   * - This method works best with the human voice, and Agora does not recommend using it for audio containing music and a human voice.
+   * - Do not use this method with \ref IRtcEngine::setLocalVoiceReverbPreset "setLocalVoiceReverbPreset" , because the method called later overrides the one called earlier. For detailed considerations, see the advanced guide *Voice Changer and Reverberation*.
+   * - You can call this method either before or after joining a channel.
+   * @param voiceChanger   Sets the local voice changer option. The default value is #VOICE_CHANGER_OFF, which means the original voice. See details in #VOICE_CHANGER_PRESET
+   * Gender-based beatification effect works best only when assigned a proper gender:
+   * - For male: #GENERAL_BEAUTY_VOICE_MALE_MAGNETIC
+   * - For female: #GENERAL_BEAUTY_VOICE_FEMALE_FRESH or #GENERAL_BEAUTY_VOICE_FEMALE_VITALITY
+   * Failure to do so can lead to voice distortion.
+   * @return               \arg  0: Success.
+   *                       \arg  < 0: Failure.
    */
 	int setLocalVoiceChanger(agora::rtc::VOICE_CHANGER_PRESET voiceChanger);
 
-   /**
-   * @brief                Sets the preset local voice reverberation effect.
-   * @note                 \arg  Do not use this method together with \ref setLocalVoiceReverb.
-   *                       \arg  Do not use this method together with the \ref setLocalVoiceChanger method, because the method called later overrides the one called earlier.
-   * @param reverbPreset   Sets the preset audio reverberation configuration. See \ref AUDIO_REVERB_PRESET.
-   * @return               \arg  Success: 0.
-   *                       \arg  Failure: <0.
-   */
+   /** Sets the local voice reverberation option, including the virtual stereo.
+    *
+    * @deprecated Deprecated from v3.2.0. Use \ref setAudioEffectPreset  or
+    * \ref setVoiceBeautifierPreset instead.
+    *
+    * This method sets the local voice reverberation for users in a `COMMUNICATION` channel or hosts in a `LIVE_BROADCASTING` channel.
+    * After successfully calling this method, all users in the channel can hear the voice with reverberation.
+    *
+    * @note
+    * - When calling this method with enumerations that begin with `AUDIO_REVERB_FX`, ensure that you set profile in `setAudioProfile` as
+    * `AUDIO_PROFILE_MUSIC_HIGH_QUALITY(4)` or `AUDIO_PROFILE_MUSIC_HIGH_QUALITY_STEREO(5)`; otherwise, this methods cannot set the corresponding voice reverberation option.
+    * - When calling this method with `AUDIO_VIRTUAL_STEREO`, Agora recommends setting the `profile` parameter in `setAudioProfile` as `AUDIO_PROFILE_MUSIC_HIGH_QUALITY_STEREO(5)`.
+    * - This method works best with the human voice, and Agora does not recommend using it for audio containing music and a human voice.
+    * - Do not use this method with `setLocalVoiceChanger`, because the method called later overrides the one called earlier.
+    * For detailed considerations, see the advanced guide *Voice Changer and Reverberation*.
+    * - You can call this method either before or after joining a channel.
+    *
+    * @param reverbPreset The local voice reverberation option. The default value is `AUDIO_REVERB_OFF`,
+    * which means the original voice.  See #AUDIO_REVERB_PRESET.
+    * To achieve better voice effects, Agora recommends the enumeration whose name begins with `AUDIO_REVERB_FX`.
+    *
+    * @return
+    * - 0: Success.
+    * - < 0: Failure.
+    */
 	int setLocalVoiceReverbPreset(agora::rtc::AUDIO_REVERB_PRESET reverbPreset);
 
    /**
    * @brief          Specifies an SDK output log file.
-   * @brief          The log file records all SDK operations during runtime. If it does not exist, the SDK creates one.
-   * @note           \arg  The default log file is located at: C:\\Users\\<user_name>\\AppData\\Local\\Agora\\<process_name\>.
-                     \arg  Ensure that you call this method immediately after calling the \ref initialize method, otherwise the output log may not be complete.
-   * @param filePath File path of the log file. The string of the log file is in UTF-8.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @brief          By default, the SDK outputs five log files, `agorasdk.log`, `agorasdk_1.log`, `agorasdk_2.log`, `agorasdk_3.log`, `agorasdk_4.log`, each with a default size of 1024 KB.
+   * These log files are encoded in UTF-8. The SDK writes the latest logs in `agorasdk.log`. When `agorasdk.log` is full, the SDK deletes the log file with the earliest
+   * modification time among the other four, renames `agorasdk.log` to the name of the deleted log file, and create a new `agorasdk.log` to record latest logs.
+   * @note           Ensure that you call this method immediately after calling the \ref initialize method, otherwise the output log may not be complete.
+   * @param filePath The absolute path of log files. The default file path is `C: \Users\<user_name>\AppData\Local\Agora\<process_name>\agorasdk.log`.
+   * Ensure that the directory for the log files exists and is writable. You can use this parameter to rename the log files.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setLogFile(const char* filePath);
 
@@ -991,17 +1083,25 @@ public:
    * @brief          You can use one or a combination of the log filter levels. The log level follows the sequence of OFF, CRITICAL, ERROR, WARNING, INFO, and DEBUG. Choose a level to see the logs preceding that level.
    * @brief          If you set the log level to WARNING, you see the logs within levels CRITICAL, ERROR, and WARNING.
    * @param filter   Sets the log filter level. See \ref LOG_FILTER_TYPE.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setLogFilter(unsigned int filter);
 
    /**
    * @brief                   Sets the log file size (KB).
-   * @brief                   The SDK has two log files, each with a default size of 512 KB. If you set \a fileSizeInBytes as 1024 KB, the SDK outputs log files with a total maximum size of 2 MB. If the total size of the log files exceed the set value, the new output log files overwrite the old output log files.
-   * @param fileSizeInKBytes  The SDK log file size (KB).
-   * @return                  \arg  Success: 0.
-   *                          \arg  Failure: <0.
+   *
+   * @note If you want to set the log file size, ensure that you call
+   * this method before \ref IRtcEngine::setLogFile "setLogFile", or the logs are cleared.
+   *
+   * By default, the SDK outputs five log files, `agorasdk.log`, `agorasdk_1.log`, `agorasdk_2.log`, `agorasdk_3.log`, `agorasdk_4.log`, each with a default size of 1024 KB.
+   * These log files are encoded in UTF-8. The SDK writes the latest logs in `agorasdk.log`. When `agorasdk.log` is full, the SDK deletes the log file with the earliest
+   * modification time among the other four, renames `agorasdk.log` to the name of the deleted log file, and create a new `agorasdk.log` to record latest logs.
+   *
+   * @param fileSizeInKBytes  The size (KB) of a log file. The default value is 1024 KB. If you set `fileSizeInKByte` to 1024 KB,
+   * the SDK outputs at most 5 MB log files; if you set it to less than 1024 KB, the maximum size of a log file is still 1024 KB.
+   * @return                  \arg  0: Success.
+   *                          \arg  < 0: Failure.
    */
 	int setLogFileSize(unsigned int fileSizeInKBytes);
 
@@ -1010,21 +1110,23 @@ public:
    * @brief             Sets the local video display mode.
    * @brief             This method can be called multiple times during a call to change the display mode.
    * @param renderMode  Sets the local video display mode. See \ref RENDER_MODE_TYPE.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int setLocalRenderMode(agora::rtc::RENDER_MODE_TYPE renderMode);
 
-   /** 
+   /**
    * @brief             Updates the display mode of the local video view.
-   * @since             v3.0.0
-   * @brief             Ensure that you have called the \ref AgoraRtcEngine::setupLocalVideo "setupLocalVideo" method to initialize the local video view before calling this method.
-   * @brief             During a call, you can call this method as many times as necessary to update the display mode of the local video view.
+   *
+   * After initializing the local video view, you can call this method to update its rendering and mirror modes. It affects only the video view that the local user sees, not the published local video stream.
+   * @note
+   * - Ensure that you have called the \ref setupLocalVideo method to initialize the local video view before calling this method.
+   * - During a call, you can call this method as many times as necessary to update the display mode of the local video view.
    * @param renderMode  The rendering mode of the local video view. See \ref RENDER_MODE_TYPE.
    * @param mirrorMode  The mirror mode of the local video view. See  \ref VIDEO_MIRROR_MODE_TYPE.
                         If you use a front camera, the SDK enables the mirror mode by default; if you use a rear camera, the SDK disables the mirror mode by default.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
     int setLocalRenderMode( agora::rtc::RENDER_MODE_TYPE renderMode, agora::rtc::VIDEO_MIRROR_MODE_TYPE mirrorMode );
 
@@ -1034,21 +1136,23 @@ public:
    * @brief             This method can be called multiple times during a call to change the display mode.
    * @param userId      ID of the remote user.
    * @param renderMode  Sets the video display mode. See \ref RENDER_MODE_TYPE.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int setRemoteRenderMode(agora::rtc::uid_t userId, agora::rtc::RENDER_MODE_TYPE renderMode);
 
    /**
    * @brief             Updates the display mode of the video view of a remote user.
-   * @since             v3.0.0 
-   * @brief             Ensure that you have called the \ref AgoraRtcEngine::setupRemoteVideo "setupRemoteVideo" method to initialize the remote video view before calling this method.
-   * @brief             During a call, you can call this method as many times as necessary to update the display mode of the video view of a remote user.
+   *
+   * After initializing the video view of a remote user, you can call this method to update its rendering and mirror modes. This method affects only the video view that the local user sees.
+   * @note
+   * - Ensure that you have called the \ref setupRemoteVideo method to initialize the remote video view before calling this method.
+   * - During a call, you can call this method as many times as necessary to update the display mode of the video view of a remote user.
    * @param userId      The ID of the remote user.
    * @param renderMode  The rendering mode of the remote video view. See \ref RENDER_MODE_TYPE.
    * @param mirrorMode  The mirror mode of the remote video view. See \ref VIDEO_MIRROR_MODE_TYPE. The SDK disables the mirror mode by default.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
    int setRemoteRenderMode( agora::rtc::uid_t userId, agora::rtc::RENDER_MODE_TYPE renderMode, agora::rtc::VIDEO_MIRROR_MODE_TYPE mirrorMode );
 
@@ -1058,8 +1162,8 @@ public:
    * @brief             You must call this method before calling the \ref startPreview method, otherwise the mirror mode will not work.
    * @note              The SDK enables the mirror mode by default.
    * @param mirrorMode  Sets the local video mirror mode. See \ref VIDEO_MIRROR_MODE_TYPE.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int setLocalVideoMirrorMode(agora::rtc::VIDEO_MIRROR_MODE_TYPE mirrorMode);
 
@@ -1069,8 +1173,8 @@ public:
    * @param enabled  Sets the stream mode:
    *                 \arg  true: Dual-stream mode.
    *                 \arg  false: (Default) Single-stream mode.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int enableDualStreamMode(bool enabled);
 
@@ -1083,8 +1187,8 @@ public:
    * @param channels    Sets the number of audio channels of the external audio source:
    *                    \arg  1: Mono.
    *                    \arg  2: Stereo.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int setExternalAudioSource(bool enabled, int sampleRate, int channels);
 
@@ -1097,8 +1201,8 @@ public:
    * @param channels    Sets the number of audio channels of the external audio sink:
    *                    \arg  1: Mono.
    *                    \arg  2: Stereo.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int setExternalAudioSink(bool enabled, int sampleRate, int channels);
 
@@ -1110,9 +1214,9 @@ public:
    *                       \arg  2: Stereo.
    * @param mode           Sets the use mode (see \ref RAW_AUDIO_FRAME_OP_MODE_TYPE) of the `onRecordAudioFrame` callback.
    * @param samplesPerCall Sets the sample points (`samples`) returned in the `onRecordAudioFrame` callback. `samplesPerCall` is usually set as 1024 for stream pushing.
-   * @brief                samplesPerCall = (int)(samplesPerSec × sampleInterval × numChannels), where sampleInterval ≥ 0.01 in seconds.
-   * @return               \arg  Success: 0.
-   *                       \arg  Failure: <0.
+   * @note The SDK triggers the `onRecordAudioFrame` callback according to the sample interval. Ensure that the sample interval ≥ 0.01 (s). And, Sample interval (sec) = `samplePerCall`/(`sampleRate` × `channel`).
+   * @return               \arg  0: Success.
+   *                       \arg  < 0: Failure.
    */
 	int setRecordingAudioFrameParameters(
 		int sampleRate, int channel, agora::rtc::RAW_AUDIO_FRAME_OP_MODE_TYPE mode, int samplesPerCall);
@@ -1125,9 +1229,9 @@ public:
    *                       \arg  2: Stereo.
    * @param mode           Sets the use mode (see \ref RAW_AUDIO_FRAME_OP_MODE_TYPE) of the onPlaybackAudioFrame callback.
    * @param samplesPerCall Sets the sample points (`samples`) returned in the `onPlaybackAudioFrame` callback. `samplesPerCall` is usually set as 1024 for stream pushing.
-   * @brief                samplesPerCall = (int)(samplesPerSec × sampleInterval × numChannels), where sampleInterval ≥ 0.01 in seconds.
-   * @return               \arg  Success: 0.
-   *                       \arg  Failure: <0.
+   * @note The SDK triggers the `onPlaybackAudioFrame` callback according to the sample interval. Ensure that the sample interval ≥ 0.01 (s). And, Sample interval (sec) = `samplePerCall`/(`sampleRate` × `channel`).
+   * @return               \arg  0: Success.
+   *                       \arg  < 0: Failure.
    */
 	int setPlaybackAudioFrameParameters(
 		int sampleRate, int channel, agora::rtc::RAW_AUDIO_FRAME_OP_MODE_TYPE mode, int samplesPerCall);
@@ -1136,31 +1240,35 @@ public:
    * @brief                Sets the mixed audio format for the \ref agora::media::IAudioFrameObserver::onMixedAudioFrame "onMixedAudioFrame" callback.
    * @param sampleRate     Sets the sample rate (`samplesPerSec`) returned in the `onMixedAudioFrame` callback, which can be set as 8000, 16000, 32000, 44100, or 48000 Hz.
    * @param samplesPerCall Sets the sample points (`samples`) returned in the `onMixedAudioFrame` callback. samplesPerCall is usually set as 1024 for stream pushing.
-   * @brief                samplesPerCall = (int)(samplesPerSec × sampleInterval × numChannels), where sampleInterval ≥ 0.01 in seconds.
-   * @return               \arg  Success: 0.
-   *                       \arg  Failure: <0.
+   * @note The SDK triggers the `onMixedAudioFrame` callback according to the sample interval. Ensure that the sample interval ≥ 0.01 (s). And, Sample interval (sec) = `samplePerCall`/(`sampleRate` × `channels`).
+   * @return               \arg  0: Success.
+   *                       \arg  < 0: Failure.
    */
 	int setMixedAudioFrameParameters(int sampleRate, int samplesPerCall);
 
    /**
    * @brief          Adjusts the recording volume.
-   * @param volume   Recording volume. The value ranges between 0 and 400:
-   *                 \arg  0: Mute.
-   *                 \arg  100: Original volume.
-   *                 \arg  400: (Maximum) Four times the original volume with signal clipping protection.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @note You can call this method either before or after joining a channel.
+   * @param volume   Recording volume. To avoid echoes and
+   *  improve call quality, Agora recommends setting the value of volume between
+   *  0 and 100. If you need to set the value higher than 100, contact
+   *  support@agora.io first.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int adjustRecordingSignalVolume(int volume);
 
    /**
    * @brief          Adjusts the playback volume of the voice.
-   * @param volume   The playback volume of the voice. The value ranges between 0 and 400:
-   *                 \arg  0: Mute.
-   *                 \arg  100: Original volume.
-   *                 \arg  400: (Maximum) Four times the original volume with signal clipping protection.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @note
+   * - This method adjusts the playback volume that is the mixed volume of all remote users.
+   * - You can call this method either before or after joining a channel.
+   * - To mute the local audio playback, call both the `adjustPlaybackSignalVolume` and \ref adjustAudioMixingVolume methods and set the volume as `0`.
+   * @param volume   The playback volume of the voice. To avoid echoes and
+   * improve call quality, Agora recommends setting the value of volume between
+   *  0 and 100. If you need to set the value higher than 100, contact support@agora.io first.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int adjustPlaybackSignalVolume(int volume);
 
@@ -1172,8 +1280,8 @@ public:
    * @param enabled  Sets whether to enable/disable interoperability with the Agora Web SDK:
    *                 \arg  true: Enable.
    *                 \arg  false: (Default) Disable.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int enableWebSdkInteroperability(bool enabled);
 
@@ -1183,12 +1291,14 @@ public:
    *                 \arg  Disable the upstream video but enable audio only when the network conditions deteriorate and cannot support both video and audio.
    *                 \arg  Re-enable the video when the network conditions improve.
    * @brief          When the locally published video stream falls back to audio only or when the audio-only stream switches back to the video, the SDK triggers the \ref agora::rtc::IRtcEngineEventHandler::onLocalPublishFallbackToAudioOnly "onLocalPublishFallbackToAudioOnly" callback.
-   * @note           Agora does not recommend using this method for CDN live streaming, because the remote CDN live user will have a noticeable lag when the locally published video stream falls back to audio only.
+   * @note
+   * - Agora does not recommend using this method for CDN live streaming, because the remote CDN live user will have a noticeable lag when the locally published video stream falls back to audio only.
+   * - Ensure that you call this method before joining a channel.
    * @param option   Sets the fallback option for the locally published video stream:
    *                 \arg  \ref STREAM_FALLBACK_OPTION_DISABLED (0): (Default) No fallback behavior for the locally published video stream when the uplink network condition is poor. The stream quality is not guaranteed.
    *                 \arg  \ref STREAM_FALLBACK_OPTION_AUDIO_ONLY (2): The locally published video stream falls back to audio only when the uplink network condition is poor.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setLocalPublishFallbackOption(agora::rtc::STREAM_FALLBACK_OPTIONS option);
 
@@ -1197,9 +1307,10 @@ public:
    * @brief          The default setting for @p option is \ref STREAM_FALLBACK_OPTION_VIDEO_STREAM_LOW, where the remotely subscribed video stream falls back to the low-stream video (low resolution and low bitrate) under poor downlink network conditions.
    * @brief          If *option* is set as \ref STREAM_FALLBACK_OPTION_AUDIO_ONLY, the SDK automatically switches the video from a high-stream to a low-stream, or disables the video when the downlink network conditions cannot support both audio and video to guarantee the quality of the audio. The SDK monitors the network quality and restores the video stream when the network conditions improve.
    * @brief          When the remotely subscribed video stream falls back to audio only or when the audio-only stream switches back to the video stream, the SDK triggers the \ref agora::rtc::IRtcEngineEventHandler::onRemoteSubscribeFallbackToAudioOnly "onRemoteSubscribeFallbackToAudioOnly" callback.
+   * @note Ensure that you call this method before joining a channel.
    * @param  option  Sets the fallback option for the remotely subscribed video stream. See \ref STREAM_FALLBACK_OPTIONS.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setRemoteSubscribeFallbackOption(agora::rtc::STREAM_FALLBACK_OPTIONS option);
 
@@ -1207,8 +1318,8 @@ public:
    /**
    * @brief    Switches between front and rear cameras.
    * @note     This method is for Android and iOS only.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int switchCamera();
 
@@ -1218,63 +1329,80 @@ public:
    * @param direction   Sets the camera to be used:
    *                    \arg  CAMERA_DIRECTION.CAMERA_REAR: Use the rear camera.
    *                    \arg  CAMERA_DIRECTION.CAMERA_FRONT: Use the front camera.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int switchCamera(CAMERA_DIRECTION direction);
 
    /**
    * @brief                   Sets the default audio playback route.
    * @brief                   This method sets whether the received audio is routed to the earpiece or speakerphone by default before joining a channel. If a user does not call this method, the audio is routed to the earpiece by default. If you need to change the default audio route after joining a channel, call the  \ref setEnableSpeakerphone method.
-   * @brief                   The default setting for each mode:
-   *                          <ul>
-   *                          <li> Voice: Earpiece.
-   *                          <li> Video: Speakerphone. If a user who is in the Communication profile calls the \ref disableVideo method or if the user calls the \ref muteLocalVideoStream and \ref muteAllRemoteVideoStreams methods, the default audio route switches back to the earpiece automatically.
-   *                          <li> Live Broadcast: Speakerphone.
-   *                          <li> Gaming Voice: Speakerphone.
-   *                          </ul>
+   *
+   * The default setting for each profile:
+   * - `COMMUNICATION`: In a voice call, the default audio route is the earpiece. In a video call, the default audio route is the speakerphone.
+   * - `LIVE_BROADCASTING`: Speakerphone.
+   *
    * @note                    \arg  This method is for Android and iOS only.
-   *                          \arg  This method only works in audio mode.
    *                          \arg  Call this method before calling the \ref joinChannel method.
    *                          \arg  Regardless of whether the audio is routed to the speakerphone or earpiece by default, once a headset is plugged in or Bluetooth device is connected, the default audio route changes. The default audio route switches to the earpiece once removing the headset or disconnecting the Bluetooth device.
    * @param defaultToSpeaker  Sets the default audio route:
-   *                          -  true: Speakerphone.
-   *                          -  false: (Default) Earpiece.
-   * @return                  \arg  Success: 0.
-   *                          \arg  Failure: <0.
+   *                          -  true: Route the audio to the speakerphone. If the playback device connects to the earpiece or Bluetooth, the audio cannot be routed to the speakerphone.
+   *                          -  false: (Default) Route the audio to the earpiece. If a headset is plugged in, the audio is routed to the headset.
+   * @return                  \arg  0: Success.
+   *                          \arg  < 0: Failure.
    */
 	int setDefaultAudioRouteToSpeakerphone(bool defaultToSpeaker);
 
-   /**
-   * @brief             Enables/Disables the audio playback route to the speakerphone.
-   * @brief             This method sets whether the audio is routed to the speakerphone or earpiece.
-   * @brief             See the default audio route explanation in the \ref setDefaultAudioRouteToSpeakerphone method and check whether it is necessary to call this method.
-   * @note              \arg  This method is for Android and iOS only.
-   *                    \arg  Ensure that you have successfully called the \ref joinChannel method before calling this method.
-   *                    \arg  After calling this method, the SDK returns the \ref agora::rtc::IRtcEngineEventHandler::onAudioRouteChanged "onAudioRouteChanged" callback to indicate the changes.
-   *                    \arg  This method does not take effect if a headset is used.
-   * @param speakerOn   Sets whether to route the audio to the speakerphone or earpiece:
-   *                    \arg  true: Route the audio to the speakerphone.
-   *                    \arg  false: Route the audio to the earpiece.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
-   */
+   /** Enables/Disables the audio playback route to the speakerphone.
+
+    This method sets whether the audio is routed to the speakerphone or earpiece.
+
+    See the default audio route explanation in the \ref setDefaultAudioRouteToSpeakerphone method and check whether it is necessary to call this method.
+
+    @note
+    - This method is for Android and iOS only.
+    - Ensure that you have successfully called the \ref joinChannel method before calling this method.
+    - After calling this method, the SDK returns the \ref IRtcEngineEventHandler::onAudioRouteChanged "onAudioRouteChanged" callback to indicate the changes.
+    - This method does not take effect if a headset is used.
+    - Settings of \ref setAudioProfile and \ref setChannelProfile affect the call
+    result of `setEnableSpeakerphone`. The following are scenarios where `setEnableSpeakerphone` does not take effect:
+    - If you set `scenario` as `AUDIO_SCENARIO_GAME_STREAMING`, no user can change the audio playback route.
+    - If you set `scenario` as `AUDIO_SCENARIO_DEFAULT` or `AUDIO_SCENARIO_SHOWROOM`, the audience cannot change
+    the audio playback route. If there is only one broadcaster is in the channel, the broadcaster cannot change
+    the audio playback route either.
+    - If you set `scenario` as `AUDIO_SCENARIO_EDUCATION`, the audience cannot change the audio playback route.
+
+    @param speakerOn Sets whether to route the audio to the speakerphone or earpiece:
+    - true: Route the audio to the speakerphone. If the playback device connects to the earpiece or Bluetooth, the audio cannot be routed to the speakerphone.
+    - false: Route the audio to the earpiece. If a headset is plugged in, the audio is routed to the headset.
+
+    @return
+    - 0: Success.
+    - < 0: Failure.
+    */
 	int setEnableSpeakerphone(bool speakerOn);
 
    /**
    * @brief          Sets the volume of the in-ear monitor.
+   *
+   * @note
+   * - This method is for Android and iOS only.
+   * - Users must use wired earphones to hear their own voices.
+   * - You can call this method either before or after joining a channel.
    * @param volume   Sets the volume of the in-ear monitor. The value ranges between 0 and 100 (default).
    * @note           This method is for Android and iOS only.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setInEarMonitoringVolume(int volume);
 
    /**
    * @brief          Checks whether the speakerphone is enabled.
-   * @note           This method is for Android and iOS only.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @note
+   * - This method is for Android and iOS only.
+   * - You can call this method either before or after joining a channel.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	bool isSpeakerphoneEnabled();
 #endif
@@ -1290,8 +1418,8 @@ public:
     * @param         enable Determines whether to enable the face detection function for the local user:
     *                   - true: Enable face detection.
     *                   - false: (Default) Disable face detection.
-    * @return         \arg  Success: 0.
-    *                 \arg  Failure: <0.
+    * @return         \arg  0: Success.
+    *                 \arg  < 0: Failure.
     */
    int enableFaceDetection( bool enable );
     
@@ -1305,8 +1433,8 @@ public:
    * @note              \arg  This method is for iOS only.
    *                    \arg  This method restricts the SDK’s manipulation of the audio session. Any operation to the audio session relies solely on the app, other apps, or third-party components.
    * @param restriction The operational restriction (bit mask) of the SDK on the audio session. See \ref AUDIO_SESSION_OPERATION_RESTRICTION.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int setAudioSessionOperationRestriction(AUDIO_SESSION_OPERATION_RESTRICTION restriction);
 #endif
@@ -1321,8 +1449,8 @@ public:
    * @param deviceName  Pointer to the device name of the sound card. The default value is NULL (the default sound card).
    * @note              \arg  This method is for macOS and Windows only.
    *                    \arg  macOS does not support loopback recording of the default sound card. If you need to use this method, please use a virtual sound card and pass its name to the deviceName parameter. Agora has tested and recommends using soundflower.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int enableLoopbackRecording(bool enabled, const char* deviceName = nullptr);
 #if (defined(__APPLE__) && TARGET_OS_MAC && !TARGET_OS_IPHONE)
@@ -1331,10 +1459,10 @@ public:
    * @note                 This method is for macOS only.
    * @param displayId      The display ID of the screen to be shared. This parameter specifies which screen you want to share.
    * @param regionRect     (Optional) Sets the relative location of the region to the screen. NIL means sharing the whole screen. See \ref Rectangle. If the specified region overruns the screen, the SDK shares only the region within it; if you set width or height as 0, the SDK shares the whole screen.
-   * @param captureParams  Sets the screen sharing encoding parameters. See \ref ScreenCaptureParameters.
-   * @return               \arg  Success: 0.
+   * @param captureParams  Sets the screen sharing encoding parameters. The default video dimension is 1920 x 1080, that is, 2,073,600 pixels. Agora uses the value of `videoDimension` to calculate the charges.
+   * For details, see descriptions in ScreenCaptureParameters.
+   * @return               \arg  0: Success.
    *                       \arg  Failure: <0:
-   *                          -  `ERR_INVALID_STATE`: the screen sharing state is invalid, probably because another screen or window is being shared. Call \ref stopScreenCapture to stop the current screen sharing.
    *                          -  `ERR_INVALID_ARGUMENT`: the argument is invalid.
    */
 	int startScreenCaptureByDisplayId(
@@ -1348,10 +1476,10 @@ public:
    * @brief                Shares the whole or part of a screen by specifying the screen rect.
    * @param screenRect     Sets the relative location of the screen to the virtual screen. For information on how to get screenRect, see Share the Screen.
    * @param regionRect     (Optional) Sets the relative location of the region to the screen. NULL means sharing the whole screen. See \ref Rectangle. If the specified region overruns the screen, the SDK shares only the region within it; if you set width or height as 0, the SDK shares the whole screen.
-   * @param captureParams  Sets the screen sharing encoding parameters. See \ref ScreenCaptureParameters.
-   * @return               \arg  Success: 0.
+   * @param captureParams  Sets the screen sharing encoding parameters. The default video dimension is 1920 x 1080, that is, 2,073,600 pixels.
+   * Agora uses the value of `videoDimension` to calculate the charges. For details, see descriptions in ScreenCaptureParameters.
+   * @return               \arg  0: Success.
    *                       \arg  Failure: <0:
-   *                          -  `ERR_INVALID_STATE`: the screen sharing state is invalid, probably because another screen or window is being shared. Call \ref stopScreenCapture to stop the current screen sharing.
    *                          -  #ERR_INVALID_ARGUMENT: the argument is invalid.
    */
 	int startScreenCaptureByScreenRect(
@@ -1474,10 +1602,10 @@ public:
      </table>
    * @param windowId       The ID of the window to be shared. For information on how to get the windowId, see Share the Screen.
    * @param regionRect     (Optional) The relative location of the region to the window. NULL/NIL means sharing the whole window. See \ref Rectangle. If the specified region overruns the window, the SDK shares only the region within it; if you set width or height as 0, the SDK shares the whole window.
-   * @param captureParams  Window sharing encoding parameters. See \ref ScreenCaptureParameters.
-   * @return               \arg  Success: 0.
+   * @param captureParams  Window sharing encoding parameters. The default video dimension is 1920 x 1080, that is, 2,073,600 pixels.
+   * Agora uses the value of `videoDimension` to calculate the charges. For details, see descriptions in ScreenCaptureParameters.
+   * @return               \arg  0: Success.
    *                       \arg  Failure: <0:
-   *                          -  `ERR_INVALID_STATE`: the window sharing state is invalid, probably because another screen or window is being shared. Call \ref stopScreenCapture to stop sharing the current window.
    *                          -  #ERR_INVALID_ARGUMENT: the argument is invalid.
    */
 	int startScreenCaptureByWindowId(
@@ -1489,15 +1617,15 @@ public:
    * @brief             Sets the content hint for screen sharing.
    * @brief             A content hint suggests the type of the content being shared, so that the SDK applies different optimization algorithm to different types of content.
    * @param contentHint Sets the content hint for screen sharing. See VideoContentHint.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int setScreenCaptureContentHint(VideoContentHint contentHint);
 
    /**
    * @brief                Updates the screen sharing parameters.
    * @param captureParams  Sets the screen sharing encoding parameters. See \ref ScreenCaptureParameters.
-   * @return               \arg  Success: 0.
+   * @return               \arg  0: Success.
    *                       \arg  Failure: <0:
    *                          -  #ERR_NOT_READY: no screen or windows is being shared.
    */
@@ -1506,7 +1634,7 @@ public:
    /**
    * @brief             Updates the screen sharing region.
    * @param regionRect  Sets the relative location of the region to the screen or window. NULL means sharing the whole screen or window. See \ref Rectangle. If the specified region overruns the screen or window, the SDK shares only the region within it; if you set width or height as 0, the SDK shares the whole screen or window.
-   * @return               \arg  Success: 0.
+   * @return               \arg  0: Success.
    *                       \arg  Failure: <0:
    *                          -  #ERR_NOT_READY: no screen or window is being shared.
    */
@@ -1514,8 +1642,8 @@ public:
 
    /**
    * @brief    Stop screen sharing.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int stopScreenCapture();
 
@@ -1525,28 +1653,31 @@ public:
    * @brief          Retrieves the current call ID.
    * @brief          When a user joins a channel on a client, a *callId* is generated to identify the call from the client. Feedback methods, such as \ref rate and \ref complain, must be called after the call ends to submit feedback to the SDK.
    * @brief          The \ref rate and \ref complain methods require the *callId* parameter retrieved from the \a getCallId method during a call. *callId* is passed as an argument into the \ref rate and \ref complain methods after the call ends.
+   * @note Ensure that you call this method after joining a channel.
    * @param callId   Pointer to the current call ID.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int getCallId(agora::util::AString& callId);
 
    /**
    * @brief             Allows a user to rate a call after the call ends.
+   * @note Ensure that you call this method after joining a channel.
    * @param callId      Pointer to the ID of the call, retrieved from the \ref getCallId method.
    * @param rating      Rating of the call. The value is between 1 (lowest score) and 5 (highest score). If you set a value out of this range, the \ref ERR_INVALID_ARGUMENT (2) error returns.
    * @param description (Optional) Pointer to the description of the rating, with a string length of less than 800 bytes.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int rate(const char* callId, int rating, const char* description);
 
    /**
    * @brief             Allows a user to complain about the call quality after a call ends.
+   * @note Ensure that you call this method after joining a channel.
    * @param callId      Pointer to the ID of the call, retrieved from the \ref getCallId method.
    * @param description (Optional) Pointer to the description of the complaint, with a string length of less than 800 bytes.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int complain(const char* callId, const char* description);
 
@@ -1566,15 +1697,15 @@ public:
    * @note     \arg  Do not call any other methods before receiving the onLastmileQuality callback. Otherwise, the callback may be interrupted by other methods, and hence may not be triggered.
    *           \arg  A host should not call this method after joining a channel (when in a call).
    *           \arg  If you call this method to test the last-mile quality, the SDK consumes the bandwidth of a video stream, whose bitrate corresponds to the bitrate you set in the setVideoEncoderConfiguration method. After you join the channel, whether you have called the disableLastmileTest method or not, the SDK automatically stops consuming the bandwidth.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int enableLastmileTest();
 
    /**
    * @brief    Disables the network connection quality test.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int disableLastmileTest();
 
@@ -1590,13 +1721,15 @@ public:
    *                 \arg  Do not call other methods before receiving the `onLastmileQuality` and `onLastmileProbeResult` callbacks. Otherwise, the callbacks may be interrupted.
    *                 \arg  In the Live-broadcast profile, a host should not call this method after joining a channel.
    * @param config   Sets the configurations of the last-mile network probe test. See \ref LastmileProbeConfig.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int startLastmileProbeTest(const LastmileProbeConfig& config);
 
    /**
    * @brief    Stops the last-mile network probe test.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int stopLastmileProbeTest();
 
@@ -1613,8 +1746,8 @@ public:
    * @note           \arg  Do not use this method for CDN live streaming.
    *                 \arg  For optimal transmission, ensure that the encrypted data size does not exceed the original data size + 16 bytes. 16 bytes is the maximum padding size for AES encryption.
    * @param secret   Pointer to the encryption password.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int setEncryptionSecret(const char* secret);
 
@@ -1629,8 +1762,8 @@ public:
    *                       \arg  "aes-128-ecb": 128-bit AES encryption, ECB mode.
    *                       \arg  "aes-256-xts": 256-bit AES encryption, XTS mode.
    *                       \arg  "": When encryptionMode is set as NULL, the encryption mode is set as "aes-128-xts" by default.
-   * @return               \arg  Success: 0.
-   *                       \arg  Failure: <0.
+   * @return               \arg  0: Success.
+   *                       \arg  < 0: Failure.
    */
 	int setEncryptionMode(const char* encryptionMode);
 
@@ -1640,16 +1773,19 @@ public:
    * @note           \arg  The size of the packet sent to the network after processing should not exceed 1200 bytes, otherwise, the packet may fail to be sent.
    *                 \arg  Ensure that both receivers and senders call this method, otherwise, you may meet undefined behaviors such as no voice and black screen.
    *                 \arg  When you use CDN live streaming, recording or storage functions, Agora doesn't recommend calling this method.
+   *                 \arg  Call this method before joining a channel.
    * @param observer Pointer to the registered packet observer. See \ref IPacketObserver.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int registerPacketObserver(IPacketObserver* observer);
 
    /**
    * @brief          Creates a data stream.
    * @brief          Each user can create up to five data streams during the lifecycle of the RtcEngine.
-   * @note           Set both the reliable and ordered parameters to true or false. Do not set one as true and the other as false.
+   * @note
+   * - Set both the reliable and ordered parameters to true or false. Do not set one as true and the other as false.
+   * - Ensure that you call this method after joining a channel.
    * @param streamId Pointer to the ID of the created data stream.
    * @param reliable Sets whether or not the recipients are guaranteed to receive the data stream from the sender within five seconds:
    *                 -  true: The recipients receive the data stream from the sender within five seconds. If the recipient does not receive the data stream within five seconds, an error is reported to the application.
@@ -1657,8 +1793,8 @@ public:
    * @param ordered  Sets whether or not the recipients receive the data stream in the sent order:
    *                 -  true: The recipients receive the data stream in the sent order.
    *                 -  false: The recipients do not receive the data stream in the sent order.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int createDataStream(int* streamId, bool reliable, bool ordered);
 
@@ -1674,8 +1810,8 @@ public:
    * @param streamId ID of the sent data stream, returned in the \ref createDataStream method.
    * @param data     Pointer to the sent data.
    * @param length   Length of the sent data.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int sendStreamMessage(int streamId, const char* data, size_t length);
 
@@ -1691,7 +1827,7 @@ public:
    * @param transcodingEnabled   Sets whether transcoding is enabled/disabled:
    *                             true: Enable transcoding, to transcode the audio or video streams when publishing them to CDN live, often used for combining the audio and video streams of multiple hosts in CDN live. If you set this parameter as true, ensure that you call the \ref setLiveTranscoding method before this method.
    *                             false: Disable transcoding.
-   * @return                     \arg  Success: 0.
+   * @return                     \arg  0: Success.
    *                             \arg  Failure: <0:
    *                                - \ref ERR_INVALID_ARGUMENT (2): The RTMP URL address is NULL or has a string length of 0.
    *                                - \ref ERR_NOT_INITIALIZED (7): You have not initialized the RTC engine when publishing the stream.
@@ -1706,8 +1842,8 @@ public:
    *              \arg  The RTMP URL address must not contain special characters, such as Chinese language characters.
    *              \arg  This method applies to Live Broadcast only.
    * @param url   The RTMP URL address to be removed. The maximum length of this parameter is 1024 bytes.
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
+   * @return      \arg  0: Success.
+   *              \arg  < 0: Failure.
    */
 	int removePublishStreamUrl(const char* url);
 
@@ -1717,9 +1853,11 @@ public:
    * @note              \arg  This method applies to Live Broadcast only.
    *                    \arg  Ensure that you enable the RTMP Converter service before using this function. See Prerequisites in the advanced guide *Push Streams to CDN*.
    *                    \arg  If you call the `setLiveTranscoding` method to update the transcoding setting for the first time, the SDK does not trigger the `onTranscodingUpdated` callback.
+   *                    \arg  Ensure that you call this method after joining a channel.
+   *                    \arg  Agora supports pushing media streams in RTMPS protocol to the CDN only when you enable transcoding.
    * @param transcoding Sets the CDN live audio/video transcoding settings. See \ref LiveTranscoding.
-   * @return            \arg  Success: 0.
-   *                    \arg  Failure: <0.
+   * @return            \arg  0: Success.
+   *                    \arg  < 0: Failure.
    */
 	int setLiveTranscoding(const LiveTranscoding& transcoding);
 
@@ -1740,21 +1878,21 @@ public:
    *                       \arg  If you have mirrored the local video by calling the \ref setLocalVideoMirrorMode method, the watermark image in preview is also mirrored.
    * @param watermarkUrl   The local file path of the watermark image to be added. This method supports adding a watermark image from the local absolute or relative file path.
    * @param options        Pointer to the watermark's options to be added. See \ref WatermarkOptions for more infomation.
-   * @return               \arg  Success: 0.
-   *                       \arg  Failure: <0.
+   * @return               \arg  0: Success.
+   *                       \arg  < 0: Failure.
    */
 	int addVideoWatermark(const char* watermarkUrl, const WatermarkOptions& options);
 
    /**
    * @brief    Removes the watermark image from the video stream added by the \ref addVideoWatermark method.
-   * @return   \arg  Success: 0.
-   *           \arg  Failure: <0.
+   * @return   \arg  0: Success.
+   *           \arg  < 0: Failure.
    */
 	int clearVideoWatermarks();
 
    /**
    * @brief          Enables/Disables image enhancement and sets the options.
-   * @note           Supports Android and iOS only!
+   * @note Call this method after calling the \ref enableVideo method.
    * @param enabled  Sets whether or not to enable image enhancement:
    *                 -  true: enables image enhancement.
    *                 -  false: disables image enhancement.
@@ -1778,12 +1916,14 @@ public:
    *                    </ul>
    *                 </ul>
    * @note           \arg  Ensure that you enable the RTMP Converter service before using this function. See Prerequisites in the advanced guide *Inject Online Media Streams.
-   *                 \arg  This method applies to the Native SDK v2.4.1 and later.
+   *                 \arg  This method applies to the `LIVE_BROADCASTING` profile only.
+   *                 \arg You can inject only one media stream into the channel at the same time.
+   *                 \arg Ensure that you call this method after joining a channel.
    * @param url      Pointer to the URL address to be added to the ongoing live broadcast. Valid protocols are RTMP, HLS, and FLV.
    *                    \arg  Supported FLV audio codec type: AAC.
    *                    \arg  Supported FLV video codec type: H264 (AVC).
    * @param config   Pointer to the InjectStreamConfig object that contains the configuration of the added voice or video stream.
-   * @return         \arg  Success: 0.
+   * @return         \arg  0: Success.
    *                 \arg  Failure: <0:
    *                    -  \ref ERR_INVALID_ARGUMENT (2): The injected URL does not exist. Call this method again to inject the stream and ensure that the URL is valid.
    *                    -  \ref ERR_NOT_READY (3): The user is not in the channel.
@@ -1802,9 +1942,11 @@ public:
    * @note                 \arg  Call this method after the \ref joinChannel method.
    *                       \arg  This method takes effect only when you are a broadcaster in a Live-broadcast channel.
    *                       \arg  After a successful method call, if you want to call this method again, ensure that you call the \ref stopChannelMediaRelay method to quit the current relay.
+   *                       \arg  Contact sales-us@agora.io before implementing this function.
+   *                       \arg We do not support string user accounts in this API.
    * @param configuration  The configuration of the media stream relay: \ref ChannelMediaRelayConfiguration.
-   * @return               \arg  Success: 0.
-   *                       \arg  Failure: <0.
+   * @return               \arg  0: Success.
+   *                       \arg  < 0: Failure.
    */
 	int startChannelMediaRelay(const ChannelMediaRelayConfiguration& configuration);
 
@@ -1813,8 +1955,8 @@ public:
    * @brief                After a successful method call, the SDK triggers the \ref agora::rtc::IRtcEngineEventHandler::onChannelMediaRelayEvent "onChannelMediaRelayEvent" callback with the \ref RELAY_EVENT_PACKET_UPDATE_DEST_CHANNEL (7) state code.
    * @note                 Call this method after the \ref startChannelMediaRelay method to update the destination channel.
    * param  configuration  The media stream relay configuration: \ref ChannelMediaRelayConfiguration.
-   * @return               \arg  Success: 0.
-   *                       \arg  Failure: <0.
+   * @return               \arg  0: Success.
+   *                       \arg  < 0: Failure.
    */
 	int updateChannelMediaRelay(const ChannelMediaRelayConfiguration& configuration);
 
@@ -1823,8 +1965,8 @@ public:
    * @brief       Once the relay stops, the broadcaster quits all the destination channels.
    * @brief       After a successful method call, the SDK triggers the \ref agora::rtc::IRtcEngineEventHandler::onChannelMediaRelayStateChanged "onChannelMediaRelayStateChanged" callback. If the callback returns \ref RELAY_STATE_IDLE (0) and \ref RELAY_OK (0), the broadcaster successfully stops the relay.
    * @note        If the method call fails, the SDK triggers the `onChannelMediaRelayStateChanged` callback with the \ref RELAY_ERROR_SERVER_NO_RESPONSE (2) or \ref RELAY_ERROR_SERVER_CONNECTION_LOST (8) state code. You can leave the channel by calling the \ref leaveChannel method, and the media stream relay automatically stops.
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
+   * @return      \arg  0: Success.
+   *              \arg  < 0: Failure.
    */
 	int stopChannelMediaRelay();
 
@@ -1833,8 +1975,8 @@ public:
    * @brief       This method removes the URL address (added by the \ref addInjectStreamUrl method) from the live broadcast.
    * @note        If this method is called successfully, the SDK triggers the \ref agora::rtc::IRtcEngineEventHandler::onUserOffline "onUserOffline" callback and returns a stream uid of 666.
    * @param url   Pointer to the URL address of the added stream to be removed.
-   * @return      \arg  Success: 0.
-   *              \arg  Failure: <0.
+   * @return      \arg  0: Success.
+   *              \arg  < 0: Failure.
    */
 	int removeInjectStreamUrl(const char* url);
 
@@ -1855,8 +1997,8 @@ public:
    *                 \arg  This method applies to the Live-broadcast channel profile.
    * @param observer The \ref IMetadataObserver class. See the definition of \ref IMetadataObserver for details.
    * @param type     See \ref agora::rtc::IMetadataObserver::METADATA_TYPE "METADATA_TYPE". The SDK supports VIDEO_METADATA (0) only for now.
-   * @return         \arg  Success: 0.
-   *                 \arg  Failure: <0.
+   * @return         \arg  0: Success.
+   *                 \arg  < 0: Failure.
    */
 	int registerMediaMetadataObserver(IMetadataObserver* observer, IMetadataObserver::METADATA_TYPE type);
 

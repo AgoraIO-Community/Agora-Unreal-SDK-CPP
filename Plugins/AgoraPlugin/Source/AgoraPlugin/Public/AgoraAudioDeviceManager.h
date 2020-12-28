@@ -30,7 +30,7 @@ namespace ue4
 class AgoraRtcEngine;
 
 /**
- * Wrapper around agora::rtc::IAudioDeviceCollection
+ * Wrapper around agora::rtc::IAudioDeviceCollection.
  */
 class AGORAPLUGIN_API AudioDeviceCollection
 {
@@ -137,7 +137,7 @@ private:
 
 
 /**
- * Wrapper around agora::rtc::IAudioDeviceManager
+ * Wrapper around agora::rtc::IAudioDeviceManager.
  */
 class AGORAPLUGIN_API AgoraAudioDeviceManager
 {
@@ -325,10 +325,10 @@ public:
    * @brief          This method tests whether the microphone works properly.           
    *                 Once the test starts, the SDK uses the \ref agora::rtc::IRtcEngineEventHandler::onAudioVolumeIndication callback to notify the application with the volume information.
    * @param          indicationInterval
-   *                 Interval period (ms) of the \ref agora::rtc::IRtcEngineEventHandler::onAudioVolumeIndication callback cycle.
+   *                 The time interval (ms) at which the `onAudioVolumeIndication` callback returns. We
+   *                 recommend setting a value greater than 200 ms. This value must not be less than 10 ms; otherwise, you can not receive
+   *                 the `onAudioVolumeIndication` callback.
    *
-   *                 -  true: Muted.
-   *                 -  false: Unmuted.
    * @return
    *                 -  0: Success.
    *                 -  < 0: Failure.
@@ -401,6 +401,8 @@ public:
    * @note           This method tests the local audio devices and does not report the network conditions.
    * @param          indicationInterval
    *                 The time interval (ms) at which the \ref agora::rtc::IRtcEngineEventHandler::onAudioVolumeIndication "onAudioVolumeIndication" callback returns.
+   *                 We recommend setting a value greater than 200 ms. This value must not be less than 10 ms; otherwise, you can not receive
+   *                 the `onAudioVolumeIndication` callback.
    * @return
    *                 -  0: Success.
    *                 -  < 0: Failure.
@@ -417,6 +419,13 @@ public:
 	int stopAudioDeviceLoopbackTest();
 
 private:
+  /**
+   * Queries the AgoraRtcEngine interface.
+   * @param engine Pointer to the AgoraRtcEngine object.
+   * @return
+   * - true: Success.
+   * - false: Failure.
+   */
 	bool queryInterface(AgoraRtcEngine* engine);
 
    /**
