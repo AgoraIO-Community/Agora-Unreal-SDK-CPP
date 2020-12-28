@@ -1462,7 +1462,7 @@ public:
    * @param captureParams  Sets the screen sharing encoding parameters. The default video dimension is 1920 x 1080, that is, 2,073,600 pixels. Agora uses the value of `videoDimension` to calculate the charges.
    * For details, see descriptions in ScreenCaptureParameters.
    * @return               \arg  0: Success.
-   *                       \arg  Failure: <0:
+   *                       \arg  < 0: Failure.
    *                          -  `ERR_INVALID_ARGUMENT`: the argument is invalid.
    */
 	int startScreenCaptureByDisplayId(
@@ -1479,7 +1479,7 @@ public:
    * @param captureParams  Sets the screen sharing encoding parameters. The default video dimension is 1920 x 1080, that is, 2,073,600 pixels.
    * Agora uses the value of `videoDimension` to calculate the charges. For details, see descriptions in ScreenCaptureParameters.
    * @return               \arg  0: Success.
-   *                       \arg  Failure: <0:
+   *                       \arg  < 0: Failure.
    *                          -  #ERR_INVALID_ARGUMENT: the argument is invalid.
    */
 	int startScreenCaptureByScreenRect(
@@ -1605,7 +1605,7 @@ public:
    * @param captureParams  Window sharing encoding parameters. The default video dimension is 1920 x 1080, that is, 2,073,600 pixels.
    * Agora uses the value of `videoDimension` to calculate the charges. For details, see descriptions in ScreenCaptureParameters.
    * @return               \arg  0: Success.
-   *                       \arg  Failure: <0:
+   *                       \arg  < 0: Failure.
    *                          -  #ERR_INVALID_ARGUMENT: the argument is invalid.
    */
 	int startScreenCaptureByWindowId(
@@ -1626,7 +1626,7 @@ public:
    * @brief                Updates the screen sharing parameters.
    * @param captureParams  Sets the screen sharing encoding parameters. See \ref ScreenCaptureParameters.
    * @return               \arg  0: Success.
-   *                       \arg  Failure: <0:
+   *                       \arg  < 0: Failure.
    *                          -  #ERR_NOT_READY: no screen or windows is being shared.
    */
 	int updateScreenCaptureParameters(const ScreenCaptureParameters& captureParams);
@@ -1635,7 +1635,7 @@ public:
    * @brief             Updates the screen sharing region.
    * @param regionRect  Sets the relative location of the region to the screen or window. NULL means sharing the whole screen or window. See \ref Rectangle. If the specified region overruns the screen or window, the SDK shares only the region within it; if you set width or height as 0, the SDK shares the whole screen or window.
    * @return               \arg  0: Success.
-   *                       \arg  Failure: <0:
+   *                       \arg  < 0: Failure.
    *                          -  #ERR_NOT_READY: no screen or window is being shared.
    */
 	int updateScreenCaptureRegion(const Rectangle& regionRect);
@@ -1828,7 +1828,7 @@ public:
    *                             true: Enable transcoding, to transcode the audio or video streams when publishing them to CDN live, often used for combining the audio and video streams of multiple hosts in CDN live. If you set this parameter as true, ensure that you call the \ref setLiveTranscoding method before this method.
    *                             false: Disable transcoding.
    * @return                     \arg  0: Success.
-   *                             \arg  Failure: <0:
+   *                             \arg  < 0: Failure.
    *                                - \ref ERR_INVALID_ARGUMENT (2): The RTMP URL address is NULL or has a string length of 0.
    *                                - \ref ERR_NOT_INITIALIZED (7): You have not initialized the RTC engine when publishing the stream.
    */
@@ -1924,7 +1924,7 @@ public:
    *                    \arg  Supported FLV video codec type: H264 (AVC).
    * @param config   Pointer to the InjectStreamConfig object that contains the configuration of the added voice or video stream.
    * @return         \arg  0: Success.
-   *                 \arg  Failure: <0:
+   *                 \arg  < 0: Failure.
    *                    -  \ref ERR_INVALID_ARGUMENT (2): The injected URL does not exist. Call this method again to inject the stream and ensure that the URL is valid.
    *                    -  \ref ERR_NOT_READY (3): The user is not in the channel.
    *                    -  \ref ERR_NOT_SUPPORTED (4): The channel profile is not live broadcast. Call the \ref setChannelProfile method and set the channel profile to live broadcast before calling this method.
