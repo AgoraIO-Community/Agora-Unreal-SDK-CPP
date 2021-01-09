@@ -20,13 +20,11 @@ UVideoViewWidget::UVideoViewWidget(const FObjectInitializer& ObjectInitializer)
 void UVideoViewWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
 	//TODO:
 	Width = 640;
 	Height = 360;
 
 	RenderTargetTexture = UTexture2D::CreateTransient(Width, Height, PF_R8G8B8A8 );
-	RenderTargetTexture->UpdateResource();
 
 	BufferSize = Width * Height * 4;
 	Buffer = new uint8[BufferSize];
@@ -39,9 +37,10 @@ void UVideoViewWidget::NativeConstruct()
 	}
 	UpdateTextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, Width, Height);
 	RenderTargetTexture->UpdateTextureRegions(0, 1, UpdateTextureRegion, Width * 4, (uint32)4, Buffer);
+    RenderTargetTexture->UpdateResource();
 
 	Brush.SetResourceObject(RenderTargetTexture);
-	RenderTargetImage->SetBrush(Brush);
+    RenderTargetImage->SetBrush(Brush);
 }
 
 void UVideoViewWidget::NativeDestruct()
@@ -63,26 +62,30 @@ void UVideoViewWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 	{
 		auto NewUpdateTextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, Width, Height);
 
-		auto NewRenderTargetTexture = UTexture2D::CreateTransient(Width, Height, PF_R8G8B8A8 );
-		NewRenderTargetTexture->UpdateResource();
+		auto NewRenderTargetTexture = UTexture2D::CreateTransient(Width, Height, PF_R8G8B8A8);
+		
 		NewRenderTargetTexture->UpdateTextureRegions(0, 1, NewUpdateTextureRegion, Width * 4, (uint32)4, Buffer);
-
+        NewRenderTargetTexture->UpdateResource();
+        
 		Brush.SetResourceObject(NewRenderTargetTexture);
 		RenderTargetImage->SetBrush(Brush);
-
 		//UClass's such as UTexture2D are automatically garbage collected when there is no hard pointer references made to that object.
 		//So if you just leave it and don't reference it elsewhere then it will be destroyed automatically.
-
-		FUpdateTextureRegion2D* TmpUpdateTextureRegion = UpdateTextureRegion;
-
+        if (TmpUpdateTextureRegion) {
+            delete TmpUpdateTextureRegion;
+            TmpUpdateTextureRegion = nullptr;
+        }
+        TmpUpdateTextureRegion = UpdateTextureRegion;
 		RenderTargetTexture = NewRenderTargetTexture;
 		UpdateTextureRegion = NewUpdateTextureRegion;
-
-		delete TmpUpdateTextureRegion;
 		return;
 	}
-
+    
 	RenderTargetTexture->UpdateTextureRegions(0, 1, UpdateTextureRegion, Width * 4, (uint32)4, Buffer);
+    if (TmpUpdateTextureRegion) {
+        delete TmpUpdateTextureRegion;
+        TmpUpdateTextureRegion = nullptr;
+    }
 }
 
 void UVideoViewWidget::UpdateBuffer(
@@ -122,4 +125,5 @@ void UVideoViewWidget::ResetBuffer()
 		Buffer[i * 4 + 2] = 0x32;
 		Buffer[i * 4 + 3] = 0xFF;
 	}
+    userId = 0;
 }

@@ -55,7 +55,7 @@ void UVideoCallViewWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTi
 	}
 }
 
-void UVideoCallViewWidget::UpdateMainVideoBuffer(
+void UVideoCallViewWidget::UpdateMainVideoBuffer(uint32_t uid,
 	uint8* RGBBuffer,
 	uint32_t Width,
 	uint32_t Height,
@@ -65,9 +65,10 @@ void UVideoCallViewWidget::UpdateMainVideoBuffer(
 	{
 		return;
 	}
-	MainVideoWidth = Width;
-	MainVideoHeight = Height;
-	MainVideoViewWidget->UpdateBuffer(RGBBuffer, Width, Height, Size);
+    
+    MainVideoWidth = Width;
+    MainVideoHeight = Height;
+    MainVideoViewWidget->UpdateBuffer(RGBBuffer, Width, Height, Size);
 }
 
 void UVideoCallViewWidget::UpdateAdditionalVideoBuffer(

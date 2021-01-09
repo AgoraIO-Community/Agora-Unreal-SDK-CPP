@@ -21,7 +21,7 @@ bool VideoFrameObserver::onRenderVideoFrame(unsigned int uid, VideoFrame& Frame)
 
 	if (OnRenderVideoFrame)
 	{
-		OnRenderVideoFrame( static_cast<uint8_t*>(Frame.yBuffer), Frame.width, Frame.height, BufferSize );
+		OnRenderVideoFrame(uid, static_cast<uint8_t*>(Frame.yBuffer), Frame.width, Frame.height, BufferSize );
 	}
 
 	return true;
@@ -34,7 +34,7 @@ void VideoFrameObserver::setOnCaptureVideoFrameCallback(
 }
 
 void VideoFrameObserver::setOnRenderVideoFrameCallback(
-	std::function<void(std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> Callback)
+	std::function<void(std::uint32_t, std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> Callback)
 {
 	OnRenderVideoFrame = Callback;
 }

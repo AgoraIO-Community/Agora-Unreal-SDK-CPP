@@ -165,7 +165,7 @@ void VideoCall::RegisterOnLocalFrameCallback(
 }
 
 void VideoCall::RegisterOnRemoteFrameCallback(
-   std::function<void( std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t )> OnFrameCallback )
+   std::function<void( std::uint32_t, std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t )> OnFrameCallback )
 {
    OnRemoteFrameCallback = std::move( OnFrameCallback );
 }
@@ -199,12 +199,12 @@ void VideoCall::StartCall(
          };
          VideoFrameObserverPtr->setOnCaptureVideoFrameCallback( std::move( OnCaptureVideoFrameCallback ) );
 
-         std::function<void( std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t )> OnRenderVideoFrameCallback
-            = [this]( std::uint8_t* buffer, std::uint32_t width, std::uint32_t height, std::uint32_t size )
+         std::function<void(std::uint32_t, std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t )> OnRenderVideoFrameCallback
+            = [this](std::uint32_t uid, std::uint8_t* buffer, std::uint32_t width, std::uint32_t height, std::uint32_t size )
          {
             if( OnRemoteFrameCallback )
             {
-               OnRemoteFrameCallback( buffer, width, height, size );
+               OnRemoteFrameCallback(uid, buffer, width, height, size );
             }
             else
             {

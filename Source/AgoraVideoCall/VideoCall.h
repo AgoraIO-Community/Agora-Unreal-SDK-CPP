@@ -31,7 +31,9 @@ public:
 	void RegisterOnLocalFrameCallback(
 		std::function<void(std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> OnLocalFrameCallback);
 	void RegisterOnRemoteFrameCallback(
-		std::function<void(std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> OnRemoteFrameCallback);
+		std::function<void(std::uint32_t, std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> OnRemoteFrameCallback);
+    
+    void RegisterOnUserStatusChanged(std::function<void(std::uint32_t)> OnUserJoinedCallback, std::function<void(std::uint32_t)> OnUserOffline);
 
 	void StartCall(
 		const FString& ChannelName,
@@ -65,7 +67,7 @@ private:
 	//callback
 	//data, w, h, size
 	std::function<void(std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> OnLocalFrameCallback;
-	std::function<void(std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> OnRemoteFrameCallback;
+	std::function<void(std::uint32_t, std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> OnRemoteFrameCallback;
 
 	bool bLocalAudioMuted = false;
 	bool bLocalVideoMuted = false;

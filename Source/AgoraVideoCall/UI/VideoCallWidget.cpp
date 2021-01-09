@@ -65,7 +65,6 @@ void UVideoCallWidget::NativeDestruct()
 void UVideoCallWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {
 	Super::NativeTick(MyGeometry, DeltaTime);
-
 }
 
 void UVideoCallWidget::OnStartCall(
@@ -89,12 +88,13 @@ void UVideoCallWidget::OnStartCall(
 	VideoCallPtr->RegisterOnLocalFrameCallback(OnLocalFrameCallback);
 
 	auto OnRemoteFrameCallback = [this](
+        std::uint32_t uid,
 		std::uint8_t* Buffer,
 		std::uint32_t Width,
 		std::uint32_t Height,
 		std::uint32_t Size)
 	{
-		VideoCallViewWidget->UpdateMainVideoBuffer(Buffer, Width, Height, Size);
+		VideoCallViewWidget->UpdateMainVideoBuffer(uid, Buffer, Width, Height, Size);
 	};
 	VideoCallPtr->RegisterOnRemoteFrameCallback(OnRemoteFrameCallback);
 

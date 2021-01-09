@@ -48,10 +48,10 @@ public:
 	uint32_t Width = 0;
 	uint32_t Height = 0;
 	uint32 BufferSize = 0;
+    uint32_t userId = 0;
 	FUpdateTextureRegion2D* UpdateTextureRegion = nullptr;
-
+    FUpdateTextureRegion2D* TmpUpdateTextureRegion = nullptr;
 	FSlateBrush Brush;
-
 	FCriticalSection Mutex;
 };
 

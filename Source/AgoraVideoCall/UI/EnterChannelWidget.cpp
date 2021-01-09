@@ -80,8 +80,6 @@ If it has already been created you will join the conference in progress"));
 void UEnterChannelWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
-
-
 }
 
 void UEnterChannelWidget::OnJoin()

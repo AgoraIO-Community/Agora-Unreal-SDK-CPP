@@ -28,7 +28,7 @@ public:
 public:
 	void NativeTick(const FGeometry& MyGeometry, float DeltaTime) override;
 
-	void UpdateMainVideoBuffer(
+	void UpdateMainVideoBuffer(uint32_t uid,
 		uint8* RGBBuffer,
 		uint32_t Width,
 		uint32_t Height,
@@ -57,6 +57,4 @@ public:
 public:
 	int32 MainVideoWidth = 0;
 	int32 MainVideoHeight = 0;
-
-
 };

@@ -24,12 +24,12 @@ public:
 		std::function<void(std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> callback);
 
 	void setOnRenderVideoFrameCallback(
-		std::function<void(std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> callback);
+		std::function<void(std::uint32_t, std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> callback);
 
    virtual VIDEO_FRAME_TYPE getVideoFormatPreference() override { return FRAME_TYPE_RGBA; }
 
 private:
 
 	std::function<void(std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> OnCaptureVideoFrame;
-	std::function<void(std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> OnRenderVideoFrame;
+	std::function<void(std::uint32_t, std::uint8_t*, std::uint32_t, std::uint32_t, std::uint32_t)> OnRenderVideoFrame;
 };
