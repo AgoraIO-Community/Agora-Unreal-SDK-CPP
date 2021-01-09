@@ -360,7 +360,7 @@ void UDeviceTestWidget::StartCameraTest()
 		VideoWidth = Width;
 		VideoHeight = Height;
 
-		TestVideoViewWidget->UpdateBuffer(Buffer, Width, Height, Size);
+		TestVideoViewWidget->UpdateBuffer(0, Buffer, Width, Height, Size);
 	};
 	CameraManagerPtr->TestCameraDevice(OnFrameCallback);
 

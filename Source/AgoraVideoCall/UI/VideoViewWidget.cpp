@@ -53,54 +53,55 @@ void UVideoViewWidget::NativeDestruct()
 
 void UVideoViewWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {
+    FScopeLock lock(&Mutex);
 	Super::NativeTick(MyGeometry, DeltaTime);
+    
+    if (needUpdateFlag) {
+        if (UpdateTextureRegion->Width != Width ||
+            UpdateTextureRegion->Height != Height)
+        {
+            auto NewUpdateTextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, Width, Height);
 
-	FScopeLock lock(&Mutex);
-
-	if (UpdateTextureRegion->Width != Width ||
-		UpdateTextureRegion->Height != Height)
-	{
-		auto NewUpdateTextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, Width, Height);
-
-		auto NewRenderTargetTexture = UTexture2D::CreateTransient(Width, Height, PF_R8G8B8A8);
-		
-		NewRenderTargetTexture->UpdateTextureRegions(0, 1, NewUpdateTextureRegion, Width * 4, (uint32)4, Buffer);
-        NewRenderTargetTexture->UpdateResource();
-        
-		Brush.SetResourceObject(NewRenderTargetTexture);
-		RenderTargetImage->SetBrush(Brush);
-		//UClass's such as UTexture2D are automatically garbage collected when there is no hard pointer references made to that object.
-		//So if you just leave it and don't reference it elsewhere then it will be destroyed automatically.
+            auto NewRenderTargetTexture = UTexture2D::CreateTransient(Width, Height, PF_R8G8B8A8);
+            NewRenderTargetTexture->UpdateTextureRegions(0, 1, NewUpdateTextureRegion, Width * 4, (uint32)4, Buffer);
+            NewRenderTargetTexture->UpdateResource();
+            Brush.SetResourceObject(NewRenderTargetTexture);
+            RenderTargetImage->SetBrush(Brush);
+            //UClass's such as UTexture2D are automatically garbage collected when there is no hard pointer references made to that object.
+            //So if you just leave it and don't reference it elsewhere then it will be destroyed automatically.
+            if (TmpUpdateTextureRegion) {
+                delete TmpUpdateTextureRegion;
+                TmpUpdateTextureRegion = nullptr;
+            }
+            TmpUpdateTextureRegion = UpdateTextureRegion;
+            RenderTargetTexture = NewRenderTargetTexture;
+            UpdateTextureRegion = NewUpdateTextureRegion;
+            needUpdateFlag = false;
+            return;
+        }
+        RenderTargetTexture->UpdateTextureRegions(0, 1, UpdateTextureRegion, Width * 4, (uint32)4, Buffer);
         if (TmpUpdateTextureRegion) {
             delete TmpUpdateTextureRegion;
             TmpUpdateTextureRegion = nullptr;
         }
-        TmpUpdateTextureRegion = UpdateTextureRegion;
-		RenderTargetTexture = NewRenderTargetTexture;
-		UpdateTextureRegion = NewUpdateTextureRegion;
-		return;
-	}
-    
-	RenderTargetTexture->UpdateTextureRegions(0, 1, UpdateTextureRegion, Width * 4, (uint32)4, Buffer);
-    if (TmpUpdateTextureRegion) {
-        delete TmpUpdateTextureRegion;
-        TmpUpdateTextureRegion = nullptr;
+        needUpdateFlag = false;
     }
 }
 
 void UVideoViewWidget::UpdateBuffer(
+    uint32_t uid,
 	uint8* RGBBuffer,
 	uint32_t NewWidth,
 	uint32_t NewHeight,
 	uint32_t NewSize)
 {
 	FScopeLock lock(&Mutex);
-
 	if (!RGBBuffer)
 	{
 		return;
 	}
-
+    userId = uid;
+    needUpdateFlag = true;
 	if (BufferSize == NewSize)
 	{
 		std::copy(RGBBuffer, RGBBuffer + NewSize, Buffer);

@@ -28,6 +28,7 @@ public:
 	void NativeTick(const FGeometry& MyGeometry, float DeltaTime) override;
 
 	void UpdateBuffer(
+        uint32_t uid,
 		uint8* RGBBuffer,
 		uint32_t Width,
 		uint32_t Height,
@@ -53,5 +54,6 @@ public:
     FUpdateTextureRegion2D* TmpUpdateTextureRegion = nullptr;
 	FSlateBrush Brush;
 	FCriticalSection Mutex;
+    bool needUpdateFlag = false;
 };
 

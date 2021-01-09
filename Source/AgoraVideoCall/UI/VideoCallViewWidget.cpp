@@ -68,7 +68,7 @@ void UVideoCallViewWidget::UpdateMainVideoBuffer(uint32_t uid,
     
     MainVideoWidth = Width;
     MainVideoHeight = Height;
-    MainVideoViewWidget->UpdateBuffer(RGBBuffer, Width, Height, Size);
+    MainVideoViewWidget->UpdateBuffer(uid, RGBBuffer, Width, Height, Size);
 }
 
 void UVideoCallViewWidget::UpdateAdditionalVideoBuffer(
@@ -81,7 +81,7 @@ void UVideoCallViewWidget::UpdateAdditionalVideoBuffer(
 	{
 		return;
 	}
-	AdditionalVideoViewWidget->UpdateBuffer(RGBBuffer, Width, Height, Size);
+	AdditionalVideoViewWidget->UpdateBuffer(0, RGBBuffer, Width, Height, Size);
 }
 
 void UVideoCallViewWidget::ResetBuffers()
