@@ -95,7 +95,7 @@ class AGORAPLUGIN_API AgoraVideoDeviceManager
 {
 public:
 	AgoraVideoDeviceManager() = default;
-	
+
 	AgoraVideoDeviceManager(const AgoraVideoDeviceManager& other) = delete;
 	AgoraVideoDeviceManager(AgoraVideoDeviceManager&& other) noexcept = delete;
 	AgoraVideoDeviceManager& operator=(const AgoraVideoDeviceManager& other) = delete;
@@ -103,13 +103,21 @@ public:
 
 	~AgoraVideoDeviceManager() = default;
 
+   /**
+   * @brief          Creates the AudioDeviceManager object
+   * @param          RtcEngine
+   *                 Pointer to the RtcEngine object.
+   * @return
+   *                 -  Success: Returns a pointer to the AudioDeviceManager object
+   *                 -  Failure: Returns nullptr.
+   */
 	static AgoraVideoDeviceManager* Create(AgoraRtcEngine* RtcEngine);
 public:
 
    /**
    * @brief          Enumerates the video devices.
-   * @brief          This method returns an \ref VideoDeviceCollection object including all video devices in the system. 
-   *                 With the \ref VideoDeviceCollection object, the application can enumerate the video devices. 
+   * @brief          This method returns an \ref VideoDeviceCollection object including all video devices in the system.
+   *                 With the \ref VideoDeviceCollection object, the application can enumerate the video devices.
    * @note           The application must call the release method to \ref release the returned object after using it.
    * @return
    *                 -  An IVideoDeviceCollection object including all video devices in the system: Success.
@@ -119,7 +127,7 @@ public:
 
    /**
    * @brief          Starts the video-capture device test.
-   * @brief          This method tests whether the video-capture device works properly. 
+   * @brief          This method tests whether the video-capture device works properly.
    *                 Before calling this method, ensure that you have already called the \ref agora::rtc::IRtcEngine::enableVideo "enableVideo" method, and the window handle (hwnd) parameter is valid.
    * @param          hwnd
    *                 The window handle used to display the screen.
@@ -159,6 +167,13 @@ public:
 	int getDevice(char deviceId[agora::rtc::MAX_DEVICE_ID_LENGTH]);
 
 private:
+   /**
+   * Queries the AgoraRtcEngine interface.
+   * @param engine Pointer to the AgoraRtcEngine object.
+   * @return
+   * - true: Success.
+   * - false: Failure.
+   */
 	bool queryInterface(AgoraRtcEngine* engine);
 
    /**
