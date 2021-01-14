@@ -663,7 +663,7 @@ agora::rtc::ScreenCaptureParameters convert( const FScreenCaptureParameters& par
       convert( parameters.Dimensions ),
       parameters.FrameRate,
       parameters.Bitrate,
-      parameters.captureMouseCursor );
+      parameters.captureMouseCursor, parameters.focus);
 }
 
 agora::rtc::Rectangle convert( const FRectangle& rectangle )

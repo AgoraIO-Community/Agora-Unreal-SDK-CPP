@@ -141,9 +141,12 @@ public:
    */
    UPROPERTY( VisibleAnywhere, BlueprintReadWrite, Category = "Agora|ScreenCaptureParameters" )
       bool captureMouseCursor;
+    
+   UPROPERTY( VisibleAnywhere, BlueprintReadWrite, Category = "Agora|ScreenCaptureParameters" )
+      bool focus;
 
    FScreenCaptureParameters(): Dimensions( 1920, 1080 ), FrameRate( 5 ), Bitrate( agora::rtc::STANDARD_BITRATE ), captureMouseCursor( true ) {}
-   FScreenCaptureParameters( const FVideoDimensions& d, int f, int b, bool c ): Dimensions( d ), FrameRate( f ), Bitrate( b ), captureMouseCursor( c ) {}
+   FScreenCaptureParameters( const FVideoDimensions& d, int f, int b, bool c, bool _focus ): Dimensions( d ), FrameRate( f ), Bitrate( b ), captureMouseCursor( c ), focus( _focus ) {}
    FScreenCaptureParameters( int width, int height, int f, int b, bool c ): Dimensions( width, height ), FrameRate( f ), Bitrate( b ), captureMouseCursor( c ) {}
 };
 

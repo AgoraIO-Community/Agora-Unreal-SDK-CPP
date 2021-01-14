@@ -28,6 +28,14 @@
 	                  dst="$S(BuildDir)/libs/$S(Architecture)/libagora-crypto.so" /> -->
 	        <copyFile src="$S(PluginDir)/$S(Architecture)/libagora-rtc-sdk.so"
 	                  dst="$S(BuildDir)/libs/$S(Architecture)/libagora-rtc-sdk.so" />
+	        <copyFile src="$S(PluginDir)/$S(Architecture)/libagora-fdkaac.so"
+	                  dst="$S(BuildDir)/libs/$S(Architecture)/libagora-fdkaac.so" />
+	        <copyFile src="$S(PluginDir)/$S(Architecture)/libagora-ffmpeg.so"
+	                  dst="$S(BuildDir)/libs/$S(Architecture)/libagora-ffmpeg.so" />
+	        <copyFile src="$S(PluginDir)/$S(Architecture)/libagora-mpg123.so"
+	                  dst="$S(BuildDir)/libs/$S(Architecture)/libagora-mpg123.so" />
+	        <copyFile src="$S(PluginDir)/$S(Architecture)/libagora-soundtouch.so"
+	                  dst="$S(BuildDir)/libs/$S(Architecture)/libagora-soundtouch.so" />
 			<copyFile src="$S(PluginDir)/agora-rtc-sdk.jar"
 					dst="$S(BuildDir)/libs/agora-rtc-sdk.jar" />
 	</resourceCopies>

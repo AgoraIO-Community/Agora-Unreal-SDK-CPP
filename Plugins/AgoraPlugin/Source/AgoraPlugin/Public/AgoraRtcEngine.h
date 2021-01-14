@@ -1,4 +1,4 @@
-﻿//  Copyright (c) 2019 Agora.io. All rights reserved.
+//  Copyright (c) 2019 Agora.io. All rights reserved.
 
 #pragma once
 
@@ -9,6 +9,7 @@
 #endif
 #include <Agora/IAgoraRtcEngine.h>
 #include <Agora/IAgoraRtcChannel.h>
+#include <Agora/IAgoraRtcEngine2.h>
 #if PLATFORM_WINDOWS
 #include "Windows/HideWindowsPlatformTypes.h"
 #endif
