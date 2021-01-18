@@ -21,8 +21,8 @@
 	<!-- optional files or directories to copy to Intermediate/Android/APK -->
 	<resourceCopies>
 		<log text="PluginDir: $S(PluginDir)"/>
-	        <copyFile src="$S(PluginDir)/$S(Architecture)/libcrypto_1_0_0.so"
-	                  dst="$S(BuildDir)/libs/$S(Architecture)/libcrypto_1_0_0.so" />
+	        <!-- <copyFile src="$S(PluginDir)/$S(Architecture)/libcrypto_1_0_0.so"
+	                  dst="$S(BuildDir)/libs/$S(Architecture)/libcrypto_1_0_0.so" /> -->
 	    <!--
 			<copyFile src="$S(PluginDir)/$S(Architecture)/libagora-crypto.so"
 	                  dst="$S(BuildDir)/libs/$S(Architecture)/libagora-crypto.so" /> -->

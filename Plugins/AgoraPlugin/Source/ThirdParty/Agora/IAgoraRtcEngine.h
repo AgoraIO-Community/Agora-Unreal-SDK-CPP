@@ -2984,16 +2984,16 @@ float smoothnessLevel;
 float rednessLevel;
 
 BeautyOptions(LIGHTENING_CONTRAST_LEVEL contrastLevel, float lightening, float smoothness, float redness)
-    : lighteningLevel(lightening),
+    : lighteningContrastLevel(contrastLevel),
+    lighteningLevel(lightening),
     smoothnessLevel(smoothness),
-    rednessLevel(redness),
-    lighteningContrastLevel(contrastLevel) {}
+    rednessLevel(redness){}
 
 BeautyOptions()
-    : lighteningLevel(0),
+    : lighteningContrastLevel(LIGHTENING_CONTRAST_NORMAL),
+    lighteningLevel(0),
     smoothnessLevel(0),
-    rednessLevel(0),
-    lighteningContrastLevel(LIGHTENING_CONTRAST_NORMAL) {}
+    rednessLevel(0) {}
 };
 
 /**
