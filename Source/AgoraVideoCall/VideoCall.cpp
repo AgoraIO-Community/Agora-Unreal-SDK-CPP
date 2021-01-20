@@ -257,11 +257,6 @@ void VideoCall::StartCall(
 
 void VideoCall::StopCall()
 {
-   if( MediaEnginePtr )
-   {
-      MediaEnginePtr->registerVideoFrameObserver( nullptr );
-   }
-
    if( !RtcEnginePtr )
    {
       return;
@@ -270,11 +265,15 @@ void VideoCall::StopCall()
    if( agora::rtc::CONNECTION_STATE_DISCONNECTED != ConnectionState )
    {
       int nRet = RtcEnginePtr->leaveChannel();
-      if( nRet < 0 )
-      {
-         UE_LOG( LogTemp, Warning, TEXT( "leaveChannel ret: %d" ), nRet );
-      }
+       if( nRet < 0 )
+       {
+          UE_LOG( LogTemp, Warning, TEXT( "leaveChannel ret: %d" ), nRet );
+       }
    }
+    if( MediaEnginePtr )
+    {
+       MediaEnginePtr->registerVideoFrameObserver( nullptr );
+    }
 }
 
 bool VideoCall::MuteLocalAudio( bool bMuted )

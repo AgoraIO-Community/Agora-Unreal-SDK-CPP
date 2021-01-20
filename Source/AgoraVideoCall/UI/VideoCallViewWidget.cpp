@@ -61,7 +61,7 @@ void UVideoCallViewWidget::UpdateMainVideoBuffer(uint32_t uid,
 	uint32_t Height,
 	uint32_t Size)
 {
-	if (!MainVideoViewWidget)
+	if (!MainVideoViewWidget || ((MainVideoViewWidget->userId != -1) && (MainVideoViewWidget->userId != uid)) )
 	{
 		return;
 	}
