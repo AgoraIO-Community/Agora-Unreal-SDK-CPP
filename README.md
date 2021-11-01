@@ -1,3 +1,8 @@
+# NOTICE 
+This SDK repo has been archieved for a new repo.  
+Please go to [this URL for the latest Agora Unreal SDK](https://github.com/AgoraIO-Community/Agora-Unreal-SDK).
+
+
 # AgoraVideoCall Sample App
 
 The Agora Video Call is a demo app that will help you integrate Real Time Engagement directly into your Unreal Engine applications using the AgoraPlugin, that wraps Agora Video SDK.
