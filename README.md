@@ -1,7 +1,6 @@
-# NOTICE 
-This SDK repo has been archieved for a new repo.  
-Please go to [this URL for the latest Agora Unreal SDK](https://github.com/AgoraIO-Community/Agora-Unreal-SDK).
+![deprecated](https://user-images.githubusercontent.com/1261195/180920123-dd6edb6a-1dbb-47b7-8059-f354c792b1a4.png)
 
+# The new github repository address is https://github.com/AgoraIO-Extensions/Agora-Unreal-RTC-SDK, if you want to use it, please click.
 
 # AgoraVideoCall Sample App
 
